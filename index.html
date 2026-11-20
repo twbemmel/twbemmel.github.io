@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="nl">
+<html lang="nl" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Thomas van Bemmel — Make waves.</title>
 <meta name="description" content="Thomas William van Bemmel — merk- en digitaal ontwerper. Utrecht en Rio de Janeiro.">
@@ -1232,7 +1233,7 @@ if(/^https?:/i.test(h)){e.preventDefault();window.open(h,"_blank","noopener");re
   const js=blob(img(txt["rack.js"]),"text/javascript"), css=blob(img(txt["rack.css"]),"text/css");
   const fonts=`<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Fraunces:ital,opsz,wght@1,9..144,600;1,9..144,800&family=Familjen+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">`;
   const pages={};
-  ["nl","pt","en"].forEach(l=>{ pages["index-"+l]=blob(`<!doctype html><html lang="${l}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070b08"><title>Projeto Onze</title>${router}<script>window.__PO_LANG="${l}"<\/script>${fonts}<link rel="stylesheet" href="${css}"></head><body><div id="root"></div><script src="${js}"><\/script><\/body><\/html>`,"text/html"); });
+  ["nl","pt","en"].forEach(l=>{ pages["index-"+l]=blob(`<!doctype html><html lang="${l}" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070b08"><title>Projeto Onze</title>${router}<script>window.__PO_LANG="${l}"<\/script>${fonts}<link rel="stylesheet" href="${css}"></head><body><div id="root"></div><script src="${js}"><\/script><\/body><\/html>`,"text/html"); });
   ["shop.html","shop-pt.html","shop-en.html"].forEach(f=>{
     const h=img(txt[f]).replace(/<head>/i,"<head>"+router).replace(/location\.href\s*=\s*("[^"]*")/g,"__poGo($1)");
     pages[f]=blob(h,"text/html");
