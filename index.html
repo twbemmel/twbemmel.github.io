@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thomas van Bemmel — Make waves.</title>
+<meta name="description" content="Thomas William van Bemmel — merk- en digitaal ontwerper. Utrecht en Rio de Janeiro.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0A0E1F;--gracht:#141C3B;--deep:#10173A;--wave:#3D52FF;--ceu:#7F8CFF;--foam:#E9ECF8;--soft:#C4C9E0;--mist:#8E96B8;
+  --line:rgba(233,236,248,.12);--line2:rgba(233,236,248,.22);
+  --out:cubic-bezier(.16,1,.3,1);--ease:cubic-bezier(.65,0,.35,1);
+  --pad:clamp(20px,4.5vw,72px);--max:1440px;
+  /* VASTE AFSTANDEN — gebruik alleen deze, zodat alles even ver uit elkaar staat.
+     s1–s3: binnen een blok · s4: kop → inhoud · s5: tussen blokken · s6: tussen secties */
+  --s1:8px;--s2:16px;--s3:24px;
+  /* letters: body 18 · klein 16 (kaarten) · bijschrift 15 · label 14 · tussenkop · lead */
+  --fs-sub:clamp(30px,3.4vw,48px);--fs-lead:clamp(22px,2.2vw,32px);--fs-card:24px;
+  /* hoeken: groot (grote beelden, kaarten met foto) · normaal (alle andere beelden en kaarten) · klein (mini-thumbnails) */
+  --r-lg:24px;--r:16px;--r-sm:12px;--s4:clamp(32px,3.5vw,48px);--s5:clamp(56px,6vw,88px);--s6:clamp(88px,8vw,128px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;background:var(--night);scroll-behavior:smooth}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-stopped{overflow:hidden}
+body{background:var(--night);color:var(--foam);font-family:"Archivo",system-ui,sans-serif;font-size:18px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body.loading{overflow:hidden}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:var(--wave);color:#fff}
+:focus-visible{outline:2px solid var(--ceu);outline-offset:4px;border-radius:6px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
+.acc{color:var(--wave)}
+.todo{background:none;color:var(--ceu);border-bottom:1px dashed var(--ceu)}
+
+/* logo */
+.logo{font-weight:800;letter-spacing:-.045em;white-space:nowrap;line-height:.9;display:inline-flex;align-items:baseline}
+.logo .mm{display:inline-block;width:1.38em;height:.51em;margin:0 .01em 0 .058em;overflow:visible}
+.logo .lg-b{margin-right:.019em}
+.logo .mm path{fill:none;stroke:var(--wave);stroke-width:22}
+
+/* loader */
+.loader{position:fixed;inset:0;z-index:200;background:var(--night);display:grid;place-items:center;transition:opacity .8s var(--ease),visibility 0s .8s}
+.loader.done{opacity:0;visibility:hidden}
+.loader .logo{font-size:clamp(64px,12vw,180px)}
+.loader .mm path{stroke-dasharray:900;stroke-dashoffset:900;animation:draw 1.1s var(--ease) .15s forwards}
+.loader .be,.loader .el{opacity:0;animation:fadein .7s var(--out) forwards}
+.loader .el{animation-delay:.6s}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}
+
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .4s,transform .5s var(--out)}
+.nav.scrolled{background:rgba(10,14,31,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.nav.hide{transform:translateY(-100%)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:84px}
+.nav .logo{font-size:32px}
+.nav ul{display:flex;gap:32px;list-style:none;align-items:center}
+.nav ul a{font-weight:600;font-size:16px;position:relative}
+.nav ul a::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:100%;background:var(--wave);transform:scaleX(0);transform-origin:right;transition:transform .45s var(--out)}
+.nav ul a:hover::after{transform:scaleX(1);transform-origin:left}
+.lang{display:flex;gap:2px;border:1px solid var(--line2);border-radius:99px;padding:3px}
+.lang button{padding:5px 11px;border-radius:99px;font-size:13px;font-weight:600;color:var(--mist);transition:background .3s,color .3s}
+.lang button.on{background:var(--foam);color:var(--night)}
+.burger{display:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);position:relative}
+.burger span{position:absolute;left:13px;right:13px;height:2px;background:var(--foam);transition:transform .4s var(--out)}
+.burger span:first-child{top:17px}.burger span:last-child{top:25px}
+.menu-open .burger span:first-child{transform:translateY(4px) rotate(45deg)}
+.menu-open .burger span:last-child{transform:translateY(-4px) rotate(-45deg)}
+.mmenu{position:fixed;inset:0;z-index:99;background:var(--night);display:flex;flex-direction:column;justify-content:center;gap:10px;padding:var(--pad);opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s}
+.menu-open .mmenu{opacity:1;visibility:visible;transition:opacity .4s}
+.mmenu a{font-weight:800;font-size:clamp(44px,12vw,80px);letter-spacing:-.04em;line-height:1.05}
+.mmenu .lang{align-self:flex-start;margin-top:30px}
+@media (max-width:860px){.nav ul .hide-m{display:none}.burger{display:block}.nav ul{gap:12px}.nav .logo{font-size:28px}}
+
+/* hero */
+.hero{min-height:88svh;position:relative;display:flex;align-items:center;padding:110px 0 60px;overflow:hidden}
+.hero .wrap{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(30px,5vw,90px);align-items:center}
+.hero-name{font-size:clamp(13px,1.1vw,16px);font-weight:600;letter-spacing:.2em;color:var(--soft);margin-bottom:.6vw}
+.hero-logo{font-size:clamp(92px,14.5vw,262px)}
+.hero-logo .be,.hero-logo .el{display:inline-block;opacity:0;transform:translateY(30%);transition:opacity 1s var(--out),transform 1.2s var(--out)}
+.hero-logo .el{transition-delay:.2s}
+.hero-logo .mm{opacity:0;transform:scaleY(.3);transform-origin:50% 100%;transition:opacity .8s .1s,transform 1.2s var(--out) .1s}
+.go .hero-logo .be,.go .hero-logo .el,.go .hero-logo .mm{opacity:1;transform:none}
+.slogan{font-size:clamp(40px,4.6vw,78px);line-height:.95;font-weight:800;letter-spacing:-.04em;margin-top:clamp(22px,2.5vw,40px)}
+.slogan .w{position:relative;display:inline-block;color:var(--wave)}
+.slogan .uw{position:absolute;left:0;right:8%;bottom:-.14em;height:.12em;overflow:hidden}
+.slogan .uw svg{width:200%;height:100%;animation:flow 9s linear infinite}
+.slogan .uw path{fill:none;stroke:var(--wave);stroke-width:6;stroke-linecap:round}
+@keyframes flow{to{transform:translateX(-50%)}}
+.hero-sub{font-size:clamp(18px,1.5vw,22px);color:var(--soft);margin-top:22px;max-width:30ch;line-height:1.45}
+.hero-cta{display:inline-flex;align-items:center;gap:14px;margin-top:32px;font-weight:700;font-size:17px}
+.hero-cta i{width:48px;height:48px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-style:normal;transition:background .4s,border-color .4s,transform .5s var(--out)}
+.hero-cta:hover i{background:var(--wave);border-color:var(--wave);transform:translateY(3px)}
+.hero-photo .media{aspect-ratio:4/5;border-radius:999px 999px var(--r-lg) var(--r-lg);max-width:440px;margin-left:auto}
+.hero-photo .media img{object-position:50% 40%} /* rugfoto: hoofd en schouders midden in de boog */
+.ccard .media.cover img{object-fit:contain;object-position:center}
+.bg-pattern{position:fixed;inset:-200px 0;z-index:0;pointer-events:none;opacity:.28;transition:opacity 1.2s var(--ease);
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27180%27%20height%3D%27180%27%3E%3Crect%20x%3D%270%27%20y%3D%27-45.0%27%20width%3D%27180%27%20height%3D%2790%27%20fill%3D%27%231B2450%27/%3E%3Crect%20x%3D%270%27%20y%3D%2745.0%27%20width%3D%27180%27%20height%3D%2790%27%20fill%3D%27%230A0E1F%27/%3E%3Crect%20x%3D%270%27%20y%3D%27135.0%27%20width%3D%27180%27%20height%3D%2790%27%20fill%3D%27%231B2450%27/%3E%3Crect%20x%3D%270%27%20y%3D%270%27%20width%3D%2790%27%20height%3D%2790%27%20rx%3D%2723.400000000000002%27%20fill%3D%27%231B2450%27/%3E%3Crect%20x%3D%2722.5%27%20y%3D%2720.249999999999996%27%20width%3D%2745.0%27%20height%3D%2749.50000000000001%27%20rx%3D%2714.4%27%20fill%3D%27%230A0E1F%27/%3E%3Crect%20x%3D%270%27%20y%3D%2790%27%20width%3D%2790%27%20height%3D%2790%27%20rx%3D%2723.400000000000002%27%20fill%3D%27%230A0E1F%27/%3E%3Crect%20x%3D%2722.5%27%20y%3D%27110.25%27%20width%3D%2745.0%27%20height%3D%2749.50000000000001%27%20rx%3D%2714.4%27%20fill%3D%27%231B2450%27/%3E%3Crect%20x%3D%2790%27%20y%3D%270%27%20width%3D%2790%27%20height%3D%2790%27%20rx%3D%2723.400000000000002%27%20fill%3D%27%230A0E1F%27/%3E%3Crect%20x%3D%27112.5%27%20y%3D%2720.249999999999996%27%20width%3D%2745.0%27%20height%3D%2749.50000000000001%27%20rx%3D%2714.4%27%20fill%3D%27%231B2450%27/%3E%3Crect%20x%3D%2790%27%20y%3D%2790%27%20width%3D%2790%27%20height%3D%2790%27%20rx%3D%2723.400000000000002%27%20fill%3D%27%231B2450%27/%3E%3Crect%20x%3D%27112.5%27%20y%3D%27110.25%27%20width%3D%2745.0%27%20height%3D%2749.50000000000001%27%20rx%3D%2714.4%27%20fill%3D%27%230A0E1F%27/%3E%3C/svg%3E");background-size:180px 180px;will-change:transform}
+.bg-pattern::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(10,14,31,.75),rgba(10,14,31,.35) 70%)}
+main{position:relative;z-index:1}
+.ch{display:inline-block;will-change:transform}
+.wavy{color:var(--wave)}
+.val{position:relative;border-top:0;padding:22px 0 0;cursor:default;outline:none}
+.val::before,.val::after{content:"";position:absolute;left:0;top:0;height:2px;width:100%}
+.val::before{background:var(--line2)}
+.val::after{background:var(--wave);transform:scaleX(0);transform-origin:left;transition:transform .8s var(--out)}
+.val:hover::after,.val:focus-visible::after{transform:scaleX(1)}
+.val.w::before{background:rgba(61,82,255,.45)}
+.val .ic{display:block;width:56px;height:30px;margin-bottom:18px;overflow:hidden}
+.val .ic svg{display:block;height:30px;overflow:visible}
+.val .ic rect{fill:var(--ceu);transform-box:fill-box;transform-origin:center}
+.val:hover .ic rect,.val:focus-visible .ic rect{animation:lay .55s var(--out) both}
+.val .ic rect:nth-child(2){animation-delay:.07s!important}.val .ic rect:nth-child(3){animation-delay:.14s!important}.val .ic rect:nth-child(4){animation-delay:.21s!important}.val .ic rect:nth-child(5){animation-delay:.28s!important}
+@keyframes lay{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+.val .ic path{fill:none;stroke:var(--wave);stroke-width:3.5;stroke-linecap:round}
+.val .ic svg.wv{width:112px}
+.val:hover .ic svg.wv,.val:focus-visible .ic svg.wv{animation:flowx 1.6s linear infinite}
+@keyframes flowx{to{transform:translateX(-56px)}}
+.val b{transition:transform .5s var(--out),color .4s}
+.val span.tx{transition:transform .5s var(--out) .05s}
+.val:hover b,.val:focus-visible b{transform:translateX(6px)}
+.val.w:hover b,.val.w:focus-visible b{color:var(--wave)}
+.val:hover span.tx,.val:focus-visible span.tx{transform:translateX(6px)}
+.in-hero{opacity:0;transform:translateY(20px);transition:opacity 1s var(--out),transform 1s var(--out)}
+.go .in-hero{opacity:1;transform:none}
+.go .in-hero.d2{transition-delay:.15s}.go .in-hero.d3{transition-delay:.3s}
+@media (max-width:860px){
+  .hero{min-height:auto;padding-top:120px}
+  .hero .wrap{grid-template-columns:1fr}
+  .hero-photo .media{max-width:300px;margin:0}
+  .hero-logo{font-size:25vw}
+}
+.h2 .ln{display:block;overflow:hidden;padding-bottom:.06em}
+.h2 .ln>span{display:block;transform:translateY(105%);transition:transform 1.1s var(--out)}
+.h2.in .ln>span{transform:none}
+.h2[data-reveal]{opacity:1;transform:none}
+.ccard .media{clip-path:inset(18% 0 0 0 round 22px);transition:clip-path 1.3s var(--out)}
+.ccard.in .media{clip-path:inset(0 0 0 0 round 22px)}
+.ccard{transition:opacity 1s var(--out),transform 1s var(--out)}
+.ccard:hover .media{box-shadow:0 0 0 2px var(--wave)}
+
+/* sections */
+section{position:relative}
+.sec{padding:var(--s6) 0 0} /* alleen boven: zo tellen twee secties nooit dubbel op */
+.h2{font-weight:800;font-size:clamp(46px,6.5vw,104px);line-height:.9;letter-spacing:-.045em;margin-bottom:var(--s4)}
+.lead{font-size:var(--fs-lead);line-height:1.3;letter-spacing:-.015em;font-weight:500;color:var(--soft);max-width:34ch}
+[data-reveal]{opacity:0;transform:translateY(30px);transition:opacity 1s var(--out),transform 1s var(--out)}
+[data-reveal].in{opacity:1;transform:none}
+
+/* cases */
+.cases{padding-top:var(--s5);padding-bottom:var(--s5)}
+.after-mq{padding-top:var(--s5)} /* marquee = scheidingslijn: s5 erboven en eronder */
+.case-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(16px,2vw,28px)}
+.ccard{display:flex;flex-direction:column;gap:22px;cursor:pointer;text-align:left}
+.ccard .media{aspect-ratio:4/5;border-radius:var(--r-lg)}
+.ccard .media img{transition:transform 1.1s var(--out)}
+.ccard:hover .media img{transform:scale(1.04)}
+.ccard h3{font-size:clamp(30px,2.8vw,44px);font-weight:800;letter-spacing:-.035em;line-height:1}
+.ccard p{color:var(--soft);font-size:16px;line-height:1.5;margin-top:12px;max-width:34ch}
+.ccard .more{display:inline-flex;align-items:center;gap:10px;margin-top:16px;font-weight:700;font-size:16px}
+.ccard .more i{font-style:normal;transition:transform .5s var(--out)}
+.ccard:hover .more i{transform:translateX(6px)}
+.ccard:nth-child(2){transition-delay:.1s}.ccard:nth-child(3){transition-delay:.2s}
+@media (max-width:900px){.case-grid{grid-template-columns:1fr}.ccard .media{aspect-ratio:4/5;max-width:520px}}
+
+/* marquee */
+.marquee{overflow:hidden;padding:26px 0;border-block:1px solid var(--line)}
+.mq-track{display:flex;width:max-content;will-change:transform}
+.mq-track span{font-weight:800;font-size:clamp(30px,4.5vw,64px);letter-spacing:-.035em;line-height:1;padding-right:.5em;white-space:nowrap;display:flex;align-items:center;gap:.5em;color:#262F5C}
+.mq-track svg{width:.9em;height:.36em;flex:none;overflow:visible}
+.mq-track svg path{fill:none;stroke:var(--wave);stroke-width:9}
+
+/* process */
+/* subgrid: elke kaart deelt de rijen (nummer · titel · tekst), dus titels en teksten beginnen overal op dezelfde lijn */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.step{background:var(--gracht);border-radius:var(--r);padding:28px;display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;position:relative;overflow:hidden}
+.step .n{font-weight:700;font-size:14px;letter-spacing:.02em;color:var(--ceu)}
+.step h3{font-size:var(--fs-card);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:var(--s5) 0 12px}
+.step p{font-size:16px;color:var(--soft);line-height:1.5}
+.step.last{background:var(--wave)}
+.step.last .n{color:#dfe3ff}.step.last p{color:#eef0ff}
+.step.last svg{position:absolute;right:-6px;top:24px;width:130px;height:34px;opacity:.45}
+.step.last svg path{fill:none;stroke:#fff;stroke-width:6}
+.step:nth-child(2){transition-delay:.08s}.step:nth-child(3){transition-delay:.16s}.step:nth-child(4){transition-delay:.24s}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.steps{grid-template-columns:1fr}}
+
+/* media / placeholders */
+.media{position:relative;overflow:hidden;background:var(--gracht)}
+.media img{width:100%;height:100%;object-fit:cover}
+.media.contain img{object-fit:contain}
+.media.ph{background-color:var(--gracht);display:grid;place-items:center;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='56'%3E%3Crect x='2' y='2' width='76' height='24' fill='%23182148'/%3E%3Crect x='-38' y='30' width='76' height='24' fill='%23182148'/%3E%3Crect x='42' y='30' width='76' height='24' fill='%23182148'/%3E%3C/svg%3E")}
+.ph-in{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 16px;background:rgba(10,14,31,.85);border:1px dashed rgba(127,140,255,.45);border-radius:12px;max-width:85%}
+.ph-in .k{font-size:12px;font-weight:600;color:var(--ceu);letter-spacing:.02em}
+.ph-in .l{font-size:14px;color:var(--soft);line-height:1.3}
+
+/* more work */
+/* masonry: layoutWork() zet elke foto in de kortste kolom en trekt de kolommen gelijk (geen gat onderaan) */
+.work-grid{display:flex;gap:16px;align-items:flex-start}
+.wk-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:16px}
+.wk{display:block;width:100%}
+.wk .media{border-radius:var(--r);background:#E9ECF8}
+@media (max-width:600px){.work-grid,.wk-col{gap:10px}}
+.wk img{transition:transform 1s var(--out)}
+.wk:hover img{transform:scale(1.04)}
+
+/* about */
+.about{display:grid;grid-template-columns:1fr 1.3fr;gap:clamp(30px,6vw,110px);align-items:start}
+.about-photo .media{aspect-ratio:4/5;border-radius:999px 999px var(--r-lg) var(--r-lg)}
+.about-photo .media img{object-position:50% 72%} /* staande selfie: iets lager uitsnijden, gezicht midden in de boog */
+.about-text p{color:var(--soft);font-size:18px;max-width:56ch}
+.about-text p+p{margin-top:18px}
+.about-text p.lead{font-size:var(--fs-lead);color:var(--foam);line-height:1.3}
+/* Steen × Golf en Mijn ontwerpwaarden: zelfde raster (titel links, tekst rechts, bovenaan uitgelijnd),
+   zelfde kopmaat en dezelfde tekstmaat als de Over mij-tekst, zodat ze rustig onder elkaar staan */
+.concept,.vals-head{margin-top:var(--s5);display:grid;grid-template-columns:1fr 1.3fr;gap:clamp(24px,5vw,80px);align-items:start;border-top:1px solid var(--line);padding-top:var(--s4)}
+.concept h3,.vals-head h3{font-size:var(--fs-sub);font-weight:800;letter-spacing:-.035em;line-height:1}
+.concept p,.vals-head p{color:var(--soft);font-size:18px;line-height:1.6;max-width:56ch}
+/* mini-graphic: baksteen × golf. Bij hover leggen de stenen zich (als bij de waarden) en gaat de golf lopen */
+.concept{position:relative;outline:none;cursor:default}
+.concept::after{content:"";position:absolute;left:0;top:-1px;height:2px;width:100%;background:var(--wave);transform:scaleX(0);transform-origin:left;transition:transform .8s var(--out)}
+.concept:hover::after,.concept:focus-visible::after{transform:scaleX(1)}
+.concept .sg-tx p+p{margin-top:18px}
+.sg-ic{display:flex;align-items:center;gap:14px;margin-top:var(--s3)}
+.sg-ic .br,.sg-ic .wa{display:block;width:75px;height:40px;overflow:hidden}
+.sg-ic svg{display:block;height:40px;overflow:visible}
+.sg-ic rect{fill:var(--ceu);transform-box:fill-box;transform-origin:center}
+.sg-ic path{fill:none;stroke:var(--wave);stroke-width:3.5;stroke-linecap:round}
+.sg-ic svg.wv{width:150px}
+.sg-ic .x{color:var(--wave);font-weight:800;font-size:26px;line-height:1;transition:transform .6s var(--out)}
+.concept:hover .sg-ic rect,.concept:focus-visible .sg-ic rect{animation:lay .55s var(--out) both}
+.sg-ic rect:nth-child(2){animation-delay:.07s!important}.sg-ic rect:nth-child(3){animation-delay:.14s!important}.sg-ic rect:nth-child(4){animation-delay:.21s!important}.sg-ic rect:nth-child(5){animation-delay:.28s!important}
+.concept:hover .sg-ic .x,.concept:focus-visible .sg-ic .x{transform:rotate(90deg)}
+.concept:hover .sg-ic svg.wv,.concept:focus-visible .sg-ic svg.wv{animation:sgflow 1.6s linear infinite}
+@keyframes sgflow{to{transform:translateX(-75px)}}
+.concept canvas{width:100%;aspect-ratio:16/9;border-radius:22px;display:block;background:var(--night)}
+.concept .cap{display:flex;justify-content:space-between;color:var(--mist);font-size:14px;margin-top:12px}
+.pr-sub{margin-bottom:var(--s4)}
+.values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;margin-top:var(--s4)}
+@media (max-width:900px){.vals-head{grid-template-columns:1fr}}
+.val{border-top:2px solid var(--line2);padding-top:18px}
+.val.w{border-color:var(--wave)}
+.val b{display:block;font-size:var(--fs-card);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
+.val span{font-size:16px;color:var(--soft);line-height:1.5;display:block}
+.tools{margin-top:var(--s4);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tools span{border:1px solid var(--line2);border-radius:99px;padding:8px 16px;font-size:15px;font-weight:600}
+@media (max-width:900px){.about,.concept{grid-template-columns:1fr}.about-photo{max-width:340px}}
+/* waarden: icoon, titel en tekst op dezelfde lijn, ook als één titel afbreekt (subgrid, net als de stappen) */
+.val{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;align-content:start}
+/* waarden: 2 kolommen tot 1100px, anders breken de titels ongelijk af en staan de teksten scheef */
+@media (max-width:1100px){.values{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.values{grid-template-columns:1fr}}
+
+/* bts — rustige strip */
+.bts{overflow:hidden;padding:10px 0 0}
+.bts-track{display:flex;align-items:flex-start;gap:28px;padding:0 var(--pad);width:max-content;cursor:grab;user-select:none;touch-action:pan-y}
+.bts-track.drag{cursor:grabbing}
+.bts-track figure{flex:none;width:clamp(220px,25vw,400px)}
+.bts-track figure:nth-child(even){margin-top:60px}
+.bts-track .media{aspect-ratio:4/5;border-radius:999px 999px var(--r) var(--r)}
+.bts-track img{pointer-events:none}
+
+/* contact */
+.contact{padding:var(--s6) 0 var(--s4)}
+.contact .big{font-size:clamp(56px,9.5vw,170px);line-height:.88;font-weight:800;letter-spacing:-.05em}
+.contact-row{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-top:var(--s4);flex-wrap:wrap}
+.contact-row p{color:var(--soft);max-width:36ch;margin-bottom:14px}
+.mail{font-size:clamp(22px,2.6vw,38px);font-weight:700;letter-spacing:-.02em;border-bottom:2px solid var(--wave);padding-bottom:2px}
+.btn{display:inline-flex;align-items:center;gap:12px;background:var(--wave);color:#fff;font-weight:700;border-radius:99px;padding:18px 28px;transition:background .3s,color .3s}
+.btn:hover{background:var(--foam);color:var(--night)}
+.foot{margin-top:var(--s5);padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--mist);font-size:15px}
+.foot a:hover{color:var(--foam)}
+.foot .soc{display:flex;gap:22px}
+.clocks{display:flex;gap:22px}
+.clocks b{color:var(--foam);font-weight:600}
+.giant{font-size:22vw;margin-top:50px;color:var(--foam);display:flex;justify-content:center}
+
+/* overlay */
+.ov{position:fixed;inset:0;z-index:140;background:var(--night);overflow-y:auto;overscroll-behavior:contain;opacity:0;visibility:hidden;transform:translateY(40px);transition:opacity .5s var(--ease),transform .7s var(--out),visibility 0s .5s}
+.ov.open{opacity:1;visibility:visible;transform:none;transition:opacity .5s var(--ease),transform .7s var(--out)}
+.ov-bar{position:sticky;top:0;z-index:5;background:rgba(10,14,31,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.ov-bar .wrap{display:flex;align-items:center;justify-content:space-between;height:84px}
+.ov-bar .logo{font-size:28px}
+.ov-close{display:inline-flex;align-items:center;gap:10px;font-weight:600}
+.ov-close i{width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-style:normal;transition:background .3s,border-color .3s}
+.ov-close:hover i{background:var(--wave);border-color:var(--wave)}
+.o-head{padding:var(--s5) 0 0}
+/* logo rechts naast titel + intro (zelfde lichte kaart als op de homepage); meta eronder over de hele breedte */
+.o-head.has-logo{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--s5);align-items:end}
+.o-head.has-logo .o-meta{grid-column:1/-1}
+.o-logo .media{width:clamp(160px,18vw,280px);aspect-ratio:4/5;border-radius:var(--r-lg)}
+@media (max-width:700px){.o-head.has-logo{grid-template-columns:1fr}.o-logo{order:-1;margin-bottom:var(--s3)}.o-logo .media{width:140px;border-radius:var(--r)}}
+.o-title{font-size:clamp(60px,10vw,170px);line-height:.86;font-weight:800;letter-spacing:-.05em}
+/* Case-titel: per woord een "venster" (overflow hidden), de letters komen er één voor één van onder in.
+   De padding geeft ruimte aan de j en de p onder de lijn; de negatieve marge houdt de regelafstand gelijk. */
+.o-title .tw{display:inline-block;overflow:hidden;vertical-align:top;padding:.04em .02em .14em;margin:-.04em -.02em -.14em}
+.o-title .tc{display:inline-block;transform:translateY(110%);animation:titleUp .9s var(--out) both;animation-delay:calc(.12s + var(--i)*.035s)}
+@keyframes titleUp{to{transform:none}}
+.o-intro{font-size:var(--fs-lead);line-height:1.3;color:var(--soft);max-width:36ch;margin-top:var(--s3)}
+.o-meta{display:flex;gap:clamp(24px,5vw,80px);flex-wrap:wrap;margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line)}
+.o-meta dt{color:var(--mist);font-size:14px}
+.o-meta dd{font-weight:600}
+.o-hero{margin-top:var(--s5)}
+.o-hero .media{aspect-ratio:16/9;border-radius:var(--r-lg)}
+.o-blocks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,48px);margin-top:var(--s5)}
+.o-blocks h3{font-size:var(--fs-card);font-weight:800;letter-spacing:-.02em;line-height:1.15;padding-top:16px;border-top:2px solid var(--wave);margin-bottom:12px}
+.o-blocks p{color:var(--soft);font-size:18px;line-height:1.6}
+.o-visuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:var(--s5)}
+.o-visuals .media{aspect-ratio:4/3;border-radius:var(--r)}
+.guide{margin-top:var(--s6)}
+.guide-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:24px}
+.guide-head h3{font-size:var(--fs-sub);font-weight:800;letter-spacing:-.035em;line-height:1}
+.guide-ctrl{display:flex;align-items:center;gap:14px}
+.guide-ctrl button{width:52px;height:52px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:20px;transition:background .3s,border-color .3s,opacity .3s}
+.guide-ctrl button:hover:not(:disabled){background:var(--wave);border-color:var(--wave)}
+.guide-ctrl button:disabled{opacity:.3;cursor:default}
+.guide-ctrl .cnt{font-weight:600;font-variant-numeric:tabular-nums;min-width:64px;text-align:center}
+.guide-stage{overflow:hidden;border-radius:var(--r-lg);background:var(--gracht);touch-action:pan-y}
+.guide-track{display:flex;transition:transform .7s var(--out)}
+.guide-track .page{flex:0 0 100%;cursor:zoom-in}
+.guide-track .media{aspect-ratio:16/9}
+.guide-thumbs{display:flex;gap:10px;margin-top:14px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.guide-thumbs button{flex:0 0 120px;border-radius:10px;overflow:hidden;opacity:.45;border:2px solid transparent;transition:opacity .3s,border-color .3s}
+.guide-thumbs button.on{opacity:1;border-color:var(--wave)}
+.guide-thumbs .media{aspect-ratio:16/9}
+.guide-thumbs .ph-in{display:none}
+.o-next{display:block;margin-top:var(--s6);padding:var(--s5) 0;border-top:1px solid var(--line)}
+.o-next span{color:var(--mist)}
+.o-next h4{font-size:clamp(50px,8vw,130px);line-height:.88;letter-spacing:-.05em;font-weight:800;margin-top:10px;transition:color .4s,transform .6s var(--out)}
+.o-next:hover h4{color:var(--wave);transform:translateX(16px)}
+@media (max-width:900px){.o-blocks{grid-template-columns:1fr}.o-visuals{grid-template-columns:1fr}.guide-head{flex-direction:column;align-items:flex-start}}
+/* Projeto Onze: de website in een laptop (data: window.PO_SITE, gemaakt met "npm run portfolio") */
+.site{margin-top:var(--s6)}
+.site-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.site-head h3{font-size:var(--fs-sub);font-weight:800;letter-spacing:-.035em;line-height:1}
+.wip{display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:700;letter-spacing:.02em;padding:7px 14px 7px 12px;border-radius:999px;background:rgba(245,196,0,.12);color:#F5C400;border:1px solid rgba(245,196,0,.35)}
+.wip::before{content:"";width:8px;height:8px;border-radius:50%;background:#F5C400;animation:wipBlink 1.6s ease-in-out infinite}
+@keyframes wipBlink{50%{opacity:.25}}
+.site-p{color:var(--soft);max-width:60ch;margin-top:18px}
+.site-p small{display:block;margin-top:8px;font-size:15px;color:var(--mist)}
+.laptop{user-select:none;-webkit-user-select:none;max-width:1120px;margin:var(--s4) auto 0;padding:0 4%}
+.lt-lid{position:relative;padding:2.1% 2.1% 2.6%;border-radius:clamp(12px,1.8vw,24px) clamp(12px,1.8vw,24px) 6px 6px;background:#16181e;box-shadow:inset 0 0 0 1.5px #343844,inset 0 0 0 4px #0d0e12,0 40px 90px -30px rgba(0,0,0,.75)}
+.lt-cam{position:absolute;top:.8%;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#07080b;box-shadow:0 0 0 1px #2b2f39}
+.lt-screen{border-radius:4px;overflow:hidden;background:#000}
+.lt-bar{display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;background:#1a1c22;border-bottom:1px solid #262932}
+.lt-bar>i{width:9px;height:9px;border-radius:50%;background:#3b3e48;flex:none}
+.lt-url{flex:1;min-width:0;margin:0 8%;height:20px;border-radius:6px;background:#252831;color:#9aa0b4;font-size:11.5px;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt-url b{font-weight:600;color:#d7dae6}
+.lt-bar .wip{padding:2px 8px 2px 7px;font-size:10px;gap:5px;flex:none}
+.lt-bar .wip::before{width:6px;height:6px}
+.lt-port{position:relative;aspect-ratio:16/10;overflow:hidden;background:#070b08}
+.lt-port iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;background:#070b08}
+.lt-start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,2vw,22px);background:radial-gradient(ellipse at 50% 40%,#11301d 0%,#070b08 70%);color:#efeee8;transition:opacity .5s}
+.lt-start img{width:clamp(60px,12vw,150px);height:auto;filter:drop-shadow(0 10px 30px rgba(0,0,0,.5));transition:transform .6s var(--out)}
+.lt-start:hover img{transform:scale(1.05) rotate(-3deg)}
+.lt-start span{font-weight:700;font-size:clamp(13px,1.5vw,18px);padding:10px 20px;border-radius:999px;background:#12924a;transition:background .3s}
+.lt-start:hover span{background:#16a957}
+.lt-start.busy span{background:#2a3a30}
+.lt-start.gone{opacity:0;pointer-events:none}
+.lt-base{position:relative;height:clamp(10px,1.5vw,20px);margin:0 -4.5%;border-radius:2px 2px 50% 50%/2px 2px 100% 100%;background:linear-gradient(#e4e6ec,#b3b7c1 55%,#80848e);box-shadow:0 24px 40px -14px rgba(0,0,0,.7)}
+.lt-base::after{content:"";position:absolute;left:50%;top:0;width:13%;height:45%;transform:translateX(-50%);border-radius:0 0 10px 10px;background:#a3a7b1}
+@media (max-width:600px){.lt-bar{height:20px;padding:0 8px;gap:4px}.lt-bar>i{width:6px;height:6px}.lt-url{height:13px;font-size:8px;margin:0 4%}.lt-bar .wip{display:none}}
+
+/* hoofdstukken (FootballPlace) */
+/* hoofdstukken als overlappende cirkels (het proces van de case). Kleuren per project (ring:[…] in CASES);
+   "screen" laat de overlap oplichten, net als doorzichtige kleurvlakken. Klik = naar dat hoofdstuk. */
+/* cirkels: boven en onder evenveel ruimte (s6, net als tussen hoofdstukken); padding vangt de zigzag op */
+.spine{display:flex;justify-content:center;align-items:center;max-width:1000px;margin:var(--s6) auto 0;padding:14px 0}
+.spine button{--c:var(--wave);flex:1 1 0;max-width:190px;aspect-ratio:1;border-radius:50%;margin-left:-2.5%;
+  border:2px solid var(--c);background:color-mix(in srgb,var(--c) 22%,transparent);mix-blend-mode:screen;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 14px;text-align:center;
+  font-weight:700;font-size:clamp(12px,1.2vw,16px);hyphens:auto;line-height:1.15;letter-spacing:-.01em;color:var(--foam);
+  transition:background .4s,transform .6s var(--out)}
+.spine button:first-child{margin-left:0}
+.spine button:nth-child(odd){transform:translateY(-14%)}
+.spine button:nth-child(even){transform:translateY(14%)}
+.spine button:hover{background:color-mix(in srgb,var(--c) 45%,transparent)}
+.spine button:nth-child(odd):hover{transform:translateY(-18%)}
+.spine button:nth-child(even):hover{transform:translateY(10%)}
+.spine button b{font-size:max(11px,.7em);font-weight:600;color:var(--c);filter:brightness(1.4)}
+.spine svg{width:26px;height:10px;flex:none;margin-top:4px}
+.spine svg path{stroke:var(--c)}
+@media (max-width:700px){.spine{flex-wrap:wrap;padding:0 0 27px}.spine button{flex:0 0 36%;margin:0 -2% -6%;font-size:13px}.spine button:nth-child(n){transform:none}}
+.chap{margin-top:var(--s6);scroll-margin-top:100px}
+.chap-head{display:grid;grid-template-columns:1fr 1.3fr;gap:clamp(20px,4vw,64px);padding-top:22px;border-top:1px solid var(--line)}
+.chap-head h3{font-size:var(--fs-sub);font-weight:800;letter-spacing:-.035em;line-height:1}
+.chap-wip{display:flex;width:fit-content;margin-top:var(--s2);line-height:1.2;letter-spacing:.02em} /* zelfde label als bij de laptop */
+.chap-head h3 b{display:block;font-size:14px;letter-spacing:.02em;color:var(--ceu);font-weight:700;margin-bottom:14px}
+.chap-head p{color:var(--soft);font-size:18px;line-height:1.6;max-width:60ch}
+.chap-head p+p{margin-top:12px}
+.cm{display:grid;gap:16px;margin-top:var(--s4)}
+.cm figure{margin:0}
+.cm figcaption{margin-top:12px;font-size:15px;color:var(--mist);display:flex;align-items:center;gap:10px}
+.cm .media{border-radius:var(--r)}
+.cm.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.cm.g2 .media{aspect-ratio:16/9}
+.dir{margin-top:var(--s4)}
+.dir-h{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px}
+.dir-h b{width:30px;height:30px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:13px;color:var(--ceu)}
+.dir .cm{margin-top:16px}
+.dir.pick .dir-h b{background:var(--wave);border-color:var(--wave);color:#fff}
+.cm.d5{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.cm.d5 .media{aspect-ratio:4/5;border-radius:var(--r-sm)}
+.cm.tt{grid-template-columns:repeat(4,minmax(0,1fr))}.cm.tt .media{aspect-ratio:3/4;border-radius:var(--r)}
+.cm.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.cm.g3 .media{aspect-ratio:4/5}
+.cm.tall{grid-template-columns:repeat(3,minmax(0,1fr));max-width:900px}.cm.tall .media{aspect-ratio:9/16}
+.cm figure.pick .media{box-shadow:0 0 0 2px var(--wave)}
+.cm figure.pick figcaption{color:var(--espuma)}
+.cm .tag{font-size:12px;font-weight:600;background:var(--wave);color:#fff;padding:3px 9px;border-radius:999px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,2.5vw,36px);margin-top:var(--s4)}
+.stats div{padding-top:16px;border-top:2px solid var(--wave)}
+.stats strong{display:block;font-size:clamp(34px,4vw,58px);font-weight:800;letter-spacing:-.04em;line-height:1}
+.stats span{display:block;margin-top:10px;color:var(--soft);font-size:15px;line-height:1.45}
+.chap .guide{margin-top:var(--s4)}
+.chap .guide-head h3{display:none}
+.chap .guide-head{justify-content:flex-end}
+@media (max-width:900px){.chap-head{grid-template-columns:1fr}.cm.g2,.cm.g3{grid-template-columns:1fr}.cm.tall,.cm.tt{grid-template-columns:repeat(2,minmax(0,1fr))}.cm.d5{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}.cm.d5 figure{flex:0 0 62%;scroll-snap-align:start}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.stats{grid-template-columns:repeat(var(--n,4),minmax(0,1fr))}
+.chap-sub{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-top:var(--s5)}
+.chap-sub+.cm{margin-top:18px}
+.chap-p{color:var(--soft);font-size:18px;line-height:1.6;max-width:60ch;margin:var(--s4) 0 0 calc((100% - clamp(20px,4vw,64px))/2.3 + clamp(20px,4vw,64px))}
+.chap-p+.chap-p{margin-top:14px}
+.chap .guide+.chap-p{margin-top:var(--s4)}
+.vcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:var(--s4)}
+.vcards div{background:var(--gracht);border-radius:var(--r);padding:24px 22px 26px}
+.vcards b{font-size:14px;font-weight:700;letter-spacing:.02em;color:var(--ceu)}
+.vcards h5{font-size:var(--fs-card);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:14px 0 12px}
+.vcards p{color:var(--soft);font-size:16px;line-height:1.5}
+.cm.p8{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.cm.p8 .media{aspect-ratio:5/7;border-radius:var(--r-sm)}
+.cm.p4{grid-template-columns:repeat(4,minmax(0,1fr))}.cm.p4 .media{aspect-ratio:5/7}
+.cm.p2{grid-template-columns:repeat(2,minmax(0,1fr));max-width:820px}.cm.p2 .media{aspect-ratio:5/7}
+.cm.p1{grid-template-columns:minmax(0,1fr);max-width:520px;margin-left:auto;margin-right:auto}.cm.p1 .media{aspect-ratio:5/7}
+.cm.g3sq{grid-template-columns:repeat(3,minmax(0,1fr))}.cm.g3sq .media{aspect-ratio:1/1}
+@media (max-width:900px){.chap-p{margin-left:0}.vcards{grid-template-columns:1fr 1fr}.cm.p8,.cm.p4{grid-template-columns:repeat(2,minmax(0,1fr))}.cm.g3sq{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:180;background:rgba(6,8,18,.95);display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity .4s,visibility 0s .4s}
+.lb.open{opacity:1;visibility:visible;transition:opacity .4s}
+.lb img{max-width:92vw;max-height:86vh;border-radius:12px}
+.lb button{position:absolute;font-size:22px;padding:16px;color:var(--foam)}
+.lb .x{top:14px;right:var(--pad);font-size:16px;font-weight:600}.lb .p{left:var(--pad);top:50%}.lb .n{right:var(--pad);top:50%}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
+}
+</style>
+</head>
+<body class="loading">
+<div class="bg-pattern" aria-hidden="true"></div>
+
+<div class="loader" aria-hidden="true">
+  <div class="logo"><span class="be"><span class="lg-b">b</span>e</span><svg class="mm" viewBox="0 0 250 92"><path d="M11 92 V46 C11 2, 67 2, 67 46 C67 2, 124 2, 124 46 C124 2, 181 2, 181 46 C181 2, 238 2, 238 46 V92"></path></svg><span class="el">el</span></div>
+</div>
+
+<header class="nav">
+  <div class="wrap">
+    <a href="#top" class="logo wlogo" data-scroll aria-label="bemmel"><span class="lg-b">b</span>e<svg class="mm" viewBox="0 0 250 92" aria-hidden="true"><path d=""></path></svg>el</a>
+    <ul>
+      <li class="hide-m"><a href="#cases" data-scroll data-t="nav.cases"></a></li>
+      <li class="hide-m"><a href="#over" data-scroll data-t="nav.about"></a></li>
+      <li class="hide-m"><a href="#contact" data-scroll data-t="nav.contact"></a></li>
+      <li class="hide-m"><div class="lang" role="group" aria-label="Taal / Language / Idioma"><button data-lang="nl">NL</button><button data-lang="en">EN</button><button data-lang="pt">PT</button></div></li>
+      <li><button class="burger" aria-label="Menu"><span></span><span></span></button></li>
+    </ul>
+  </div>
+</header>
+<nav class="mmenu" aria-label="Menu">
+  <a href="#cases" data-scroll data-t="nav.cases"></a>
+  <a href="#over" data-scroll data-t="nav.about"></a>
+  <a href="#contact" data-scroll data-t="nav.contact"></a>
+  <div class="lang"><button data-lang="nl">NL</button><button data-lang="en">EN</button><button data-lang="pt">PT</button></div>
+</nav>
+
+<main id="top">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="hero-name in-hero">THOMAS WILLIAM VAN</div>
+        <div class="hero-logo logo wlogo" role="img" aria-label="bemmel"><span class="be"><span class="lg-b">b</span>e</span><svg class="mm" viewBox="0 0 250 92" aria-hidden="true"><path d=""></path></svg><span class="el">el</span></div>
+        <h1 class="slogan in-hero d2" id="slogan">Make <span class="w">waves.<span class="uw" aria-hidden="true"><svg viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 20 Q25 4 50 20 T100 20 T150 20 T200 20 T250 20 T300 20 T350 20 T400 20 T450 20 T500 20 T550 20 T600 20 T650 20 T700 20 T750 20 T800 20"></path></svg></span></span></h1>
+        <p class="hero-sub in-hero d3" data-t="hero.sub"></p>
+        <a href="#cases" data-scroll class="hero-cta in-hero d3"><span data-t="hero.cta"></span><i aria-hidden="true">↓</i></a>
+      </div>
+      <div class="hero-photo in-hero d2"><div class="media" data-media="portret-hero" data-label-t="ph.portrait"></div></div>
+    </div>
+  </section>
+
+  <!-- CASES -->
+  <section class="sec cases" id="cases">
+    <div class="wrap">
+      <h2 class="h2 wavy" data-reveal data-t="cases.title"></h2>
+      <div class="case-grid">
+        <button class="ccard" data-case="onze" data-reveal>
+          <div class="media contain cover" data-media="onze-cover" data-label="Projeto Onze" style="background:#FDFDFD"></div>
+          <div><h3>Projeto Onze</h3><p data-t="c.onze"></p><span class="more"><span data-t="c.more"></span><i>→</i></span></div>
+        </button>
+        <button class="ccard" data-case="fp" data-reveal>
+          <div class="media contain cover" data-media="fp-cover" data-label="FootballPlace" style="background:#000000"></div>
+          <div><h3>FootballPlace</h3><p data-t="c.fp"></p><span class="more"><span data-t="c.more"></span><i>→</i></span></div>
+        </button>
+        <button class="ccard" data-case="cc" data-reveal>
+          <div class="media contain cover" data-media="cc-cover" data-label="Comida Carioca" style="background:#F9E7C6"></div>
+          <div><h3>Comida Carioca</h3><p data-t="c.cc"></p><span class="more"><span data-t="c.more"></span><i>→</i></span></div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="mq-track"></div></div>
+
+  <!-- WERKWIJZE -->
+  <section class="sec after-mq">
+    <div class="wrap">
+      <h2 class="h2" data-reveal data-t-html="pr.title" style="margin-bottom:var(--s3)"></h2>
+      <p class="lead pr-sub" data-reveal data-t="pr.sub"></p>
+      <div class="steps">
+        <div class="step" data-reveal><span class="n">01</span><h3 data-t="s1.t"></h3><p data-t="s1.p"></p></div>
+        <div class="step" data-reveal><span class="n">02</span><h3 data-t="s2.t"></h3><p data-t="s2.p"></p></div>
+        <div class="step" data-reveal><span class="n">03</span><h3 data-t="s3.t"></h3><p data-t="s3.p"></p></div>
+        <div class="step last" data-reveal><svg viewBox="0 0 150 40" aria-hidden="true"><path d="M0 20 Q18.75 4 37.5 20 T75 20 T112.5 20 T150 20"></path></svg><span class="n">04</span><h3 data-t="s4.t"></h3><p data-t="s4.p"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEER WERK -->
+  <section class="sec">
+    <div class="wrap">
+      <h2 class="h2" data-reveal data-t="mw.title"></h2>
+      <div class="work-grid"></div>
+    </div>
+  </section>
+
+  <!-- OVER MIJ -->
+  <section class="sec" id="over">
+    <div class="wrap">
+      <h2 class="h2" data-reveal data-t="ab.title"></h2>
+      <div class="about">
+        <div class="about-photo" data-reveal><div class="media" data-media="portret-over" data-label-t="ph.portrait"></div></div>
+        <div class="about-text">
+          <p class="lead" data-reveal data-t="ab.lead" style="margin-bottom:var(--s3)"></p>
+          <p data-reveal data-t="ab.p1"></p>
+          <p data-reveal data-t="ab.p2"></p>
+          <p data-reveal data-t="ab.p3"></p>
+        </div>
+      </div>
+
+      <!-- Steen × Golf: het verhaal achter het logo (Utrecht + Copacabana) -->
+      <div class="concept" tabindex="0" data-reveal>
+        <div>
+          <h3 data-t-html="sg.title"></h3>
+          <div class="sg-ic" aria-hidden="true"><span class="br"><svg viewBox="0 0 56 30" aria-hidden="true"><rect x="0" y="21" width="26" height="9" rx="1.5"></rect><rect x="29" y="21" width="26" height="9" rx="1.5"></rect><rect x="14" y="10.5" width="26" height="9" rx="1.5"></rect><rect x="0" y="0" width="12" height="9" rx="1.5" opacity=".5"></rect><rect x="43" y="0" width="12" height="9" rx="1.5" opacity=".5"></rect></svg></span><span class="x">×</span><span class="wa"><svg class="wv" viewBox="0 0 112 30" aria-hidden="true"><path d="M2 24 V16 C2 4, 16 4, 16 16 C16 4, 30 4, 30 16 C30 4, 44 4, 44 16 C44 4, 58 4, 58 16 C58 4, 72 4, 72 16 C72 4, 86 4, 86 16 C86 4, 100 4, 100 16 C100 4, 114 4, 114 16"></path></svg></span></div>
+        </div>
+        <div class="sg-tx" data-t-html="sg.p"></div>
+      </div>
+
+      <div class="vals-head" data-reveal>
+        <h3 data-t="vals.title"></h3>
+        <p data-t="vals.intro"></p>
+      </div>
+      <div class="values">
+        <div class="val" tabindex="0" data-reveal><span class="ic"><svg viewBox="0 0 56 30" width="56" aria-hidden="true"><rect x="0" y="21" width="26" height="9" rx="1.5"></rect><rect x="29" y="21" width="26" height="9" rx="1.5"></rect><rect x="14" y="10.5" width="26" height="9" rx="1.5"></rect><rect x="0" y="0" width="12" height="9" rx="1.5" opacity=".5"></rect><rect x="43" y="0" width="12" height="9" rx="1.5" opacity=".5"></rect></svg></span><b data-t="v1.t"></b><span class="tx" data-t="v1.p"></span></div>
+        <div class="val" tabindex="0" data-reveal><span class="ic"><svg viewBox="0 0 56 30" width="56" aria-hidden="true"><rect x="0" y="21" width="26" height="9" rx="1.5"></rect><rect x="29" y="21" width="26" height="9" rx="1.5"></rect><rect x="14" y="10.5" width="26" height="9" rx="1.5"></rect><rect x="0" y="0" width="12" height="9" rx="1.5" opacity=".5"></rect><rect x="43" y="0" width="12" height="9" rx="1.5" opacity=".5"></rect></svg></span><b data-t="v2.t"></b><span class="tx" data-t="v2.p"></span></div>
+        <div class="val w" tabindex="0" data-reveal><span class="ic"><svg class="wv" viewBox="0 0 112 30" aria-hidden="true"><path d="M2 24 V16 C2 4, 16 4, 16 16 C16 4, 30 4, 30 16 C30 4, 44 4, 44 16 C44 4, 58 4, 58 16 C58 4, 72 4, 72 16 C72 4, 86 4, 86 16 C86 4, 100 4, 100 16 C100 4, 114 4, 114 16"></path></svg></span><b data-t="v3.t"></b><span class="tx" data-t="v3.p"></span></div>
+        <div class="val w" tabindex="0" data-reveal><span class="ic"><svg class="wv" viewBox="0 0 112 30" aria-hidden="true"><path d="M2 24 V16 C2 4, 16 4, 16 16 C16 4, 30 4, 30 16 C30 4, 44 4, 44 16 C44 4, 58 4, 58 16 C58 4, 72 4, 72 16 C72 4, 86 4, 86 16 C86 4, 100 4, 100 16 C100 4, 114 4, 114 16"></path></svg></span><b data-t="v4.t"></b><span class="tx" data-t="v4.p"></span></div>
+      </div>
+      <div class="tools" data-reveal><span>Figma</span><span>Photoshop</span><span>Illustrator</span><span>Claude</span><span>Premiere Pro</span></div>
+    </div>
+  </section>
+
+  <!-- ACHTER DE SCHERMEN -->
+  <section class="sec">
+    <div class="wrap"><h2 class="h2" data-reveal data-t="bts.title"></h2></div>
+    <div class="bts"><div class="bts-track"></div></div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <div class="big" data-reveal data-t-html="ct.title"></div>
+      <div class="contact-row" data-reveal>
+        <div><p data-t="ct.p"></p><a class="mail" id="mail" href="mailto:thomaswilliamvb@outlook.com">thomaswilliamvb@outlook.com</a></div>
+        <a class="btn" id="mailbtn" href="mailto:thomaswilliamvb@outlook.com"><span data-t="ct.btn"></span><span aria-hidden="true">→</span></a>
+      </div>
+      <div class="foot">
+        <span>© 2026 Thomas William van Bemmel</span>
+        <span class="clocks"><span>Utrecht <b class="t-utc">--:--</b></span><span>Rio de Janeiro <b class="t-rio">--:--</b></span></span>
+        <div class="soc"><a href="#" id="li">LinkedIn</a><a href="#top" data-scroll data-t="ft.top"></a></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- CASE -->
+<div class="ov" role="dialog" aria-modal="true" aria-label="Case" data-lenis-prevent>
+  <div class="ov-bar"><div class="wrap">
+    <span class="logo"><span class="lg-b">b</span>e<svg class="mm" viewBox="0 0 250 92" aria-hidden="true"><path d=""></path></svg>el</span>
+    <button class="ov-close"><span data-t="ui.close"></span><i aria-hidden="true">✕</i></button>
+  </div></div>
+  <div class="ov-inner"></div>
+</div>
+
+<div class="lb" role="dialog" aria-modal="true" aria-label="Afbeelding">
+  <button class="x" data-t="ui.close"></button>
+  <button class="p" aria-label="←">←</button><button class="n" aria-label="→">→</button>
+  <img alt="">
+</div>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+/* ======================================================
+   1. CONTACT — vul in
+   ====================================================== */
+const CONFIG = {
+  email: "thomaswilliamvb@outlook.com",
+  linkedin: "https://www.linkedin.com/in/thomas-van-bemmel/"   // volledige link
+};
+
+/* ======================================================
+   2. FOTO'S — zet per vakje een bestandsnaam of link,
+      bijvoorbeeld "img/onze-cover.jpg". Leeg = placeholder.
+   ====================================================== */
+const MEDIA = {
+  "portret-hero":"images/portret-paleis.webp", "portret-over":"images/portret-hero.webp", /* bovenaan: Rio (rugfoto); bij Over mij: de selfie */
+  "onze-cover":"images/onze-cover.webp","onze-shirt-1":"images/onze-shirt-1.webp","onze-shirt-2":"images/onze-shirt-2.webp","onze-shirt-3":"images/onze-shirt-3.webp", "onze-1":"", "onze-2":"",
+  "onze-guide-1":"images/onze-guide-1.webp",
+  "onze-guide-2":"images/onze-guide-2.webp",
+  "onze-guide-3":"images/onze-guide-3.webp",
+  "onze-guide-4":"images/onze-guide-4.webp",
+  "onze-guide-5":"images/onze-guide-5.webp",
+  "onze-guide-6":"images/onze-guide-6.webp",
+  "onze-guide-7":"images/onze-guide-7.webp",
+  "onze-guide-8":"images/onze-guide-8.webp",
+  "onze-guide-9":"images/onze-guide-9.webp",
+  "onze-guide-10":"images/onze-guide-10.webp",
+  "onze-guide-11":"images/onze-guide-11.webp",
+  "onze-guide-12":"images/onze-guide-12.webp",
+  "onze-guide-13":"images/onze-guide-13.webp",
+  "onze-guide-14":"images/onze-guide-14.webp",
+  "onze-guide-15":"images/onze-guide-15.webp",
+  "onze-guide-16":"images/onze-guide-16.webp",
+  "onze-guide-17":"images/onze-guide-17.webp",
+  "onze-guide-18":"images/onze-guide-18.webp",
+  "onze-guide-19":"images/onze-guide-19.webp",
+  "fp-cover":"images/fp-cover.webp", "fp-hero":"images/fp-hero.webp", "fp-1":"", "fp-2":"",
+  "fp-guide-1":"images/fp-guide-1.webp", "fp-guide-2":"images/fp-guide-2.webp", "fp-guide-3":"images/fp-guide-3.webp", "fp-guide-4":"images/fp-guide-4.webp", "fp-guide-5":"images/fp-guide-5.webp", "fp-guide-6":"images/fp-guide-6.webp", "fp-guide-7":"images/fp-guide-7.webp", "fp-guide-8":"images/fp-guide-8.webp", "fp-guide-9":"images/fp-guide-9.webp", "fp-guide-10":"images/fp-guide-10.webp", "fp-guide-11":"images/fp-guide-11.webp", "fp-guide-12":"images/fp-guide-12.webp", "fp-guide-13":"images/fp-guide-13.webp", "fp-guide-14":"images/fp-guide-14.webp", "fp-guide-15":"images/fp-guide-15.webp", "fp-guide-16":"images/fp-guide-16.webp", "fp-guide-17":"images/fp-guide-17.webp", "fp-guide-18":"images/fp-guide-18.webp", "fp-guide-19":"images/fp-guide-19.webp", "fp-guide-20":"images/fp-guide-20.webp", "fp-guide-21":"images/fp-guide-21.webp", "fp-guide-22":"images/fp-guide-22.webp", "fp-guide-23":"images/fp-guide-23.webp", "fp-guide-24":"images/fp-guide-24.webp", "fp-guide-25":"images/fp-guide-25.webp",
+  "fp-onderzoek-1":"images/fp-onderzoek-1.webp", "fp-onderzoek-2":"images/fp-onderzoek-2.webp",
+  "fp-r1-1":"images/fp-r1-1.webp", "fp-r1-2":"images/fp-r1-2.webp", "fp-r1-3":"images/fp-r1-3.webp", "fp-r1-4":"images/fp-r1-4.webp", "fp-r1-5":"images/fp-r1-5.webp", "fp-r2-1":"images/fp-r2-1.webp", "fp-r2-2":"images/fp-r2-2.webp", "fp-r2-3":"images/fp-r2-3.webp", "fp-r2-4":"images/fp-r2-4.webp", "fp-r2-5":"images/fp-r2-5.webp", "fp-r3-1":"images/fp-r3-1.webp", "fp-r3-2":"images/fp-r3-2.webp", "fp-r3-3":"images/fp-r3-3.webp", "fp-r3-4":"images/fp-r3-4.webp", "fp-r3-5":"images/fp-r3-5.webp",
+  "fp-format-1":"images/fp-format-1.webp", "fp-format-2":"images/fp-format-2.webp", "fp-format-3":"images/fp-format-3.webp", "fp-format-4":"images/fp-format-4.webp", "fp-format-5":"images/fp-format-5.webp", "fp-format-6":"images/fp-format-6.webp",
+  "fp-test-1":"images/fp-test-1.webp", "fp-test-2":"images/fp-test-2.webp", "fp-test-3":"images/fp-test-3.webp", "fp-test-4":"images/fp-test-4.webp",
+  "cc-cover":"images/cc-cover.webp", "cc-hero":"images/cc-hero.webp", "cc-card":"images/cc-card.webp", "cc-rev1":"images/cc-rev1.webp", "cc-rev2":"images/cc-rev2.webp",
+  "cc-guide-1":"images/cc-guide-1.webp", "cc-guide-2":"images/cc-guide-2.webp", "cc-guide-3":"images/cc-guide-3.webp", "cc-guide-4":"images/cc-guide-4.webp", "cc-guide-5":"images/cc-guide-5.webp", "cc-guide-6":"images/cc-guide-6.webp", "cc-guide-7":"images/cc-guide-7.webp", "cc-guide-8":"images/cc-guide-8.webp", "cc-guide-9":"images/cc-guide-9.webp", "cc-guide-10":"images/cc-guide-10.webp", "cc-guide-11":"images/cc-guide-11.webp", "cc-guide-12":"images/cc-guide-12.webp", "cc-guide-13":"images/cc-guide-13.webp", "cc-guide-14":"images/cc-guide-14.webp", "cc-guide-15":"images/cc-guide-15.webp", "cc-guide-16":"images/cc-guide-16.webp", "cc-guide-17":"images/cc-guide-17.webp", "cc-guide-18":"images/cc-guide-18.webp", "cc-guide-19":"images/cc-guide-19.webp", "cc-guide-20":"images/cc-guide-20.webp", "cc-guide-21":"images/cc-guide-21.webp",
+  "werk-01":"images/werk-01.webp", "werk-02":"images/werk-02.webp", "werk-03":"images/werk-03.webp", "werk-04":"images/werk-04.webp", "werk-05":"images/werk-05.webp", "werk-06":"images/werk-06.webp", "werk-07":"images/werk-07.webp", "werk-08":"images/werk-08.webp", "werk-09":"images/werk-09.webp", "werk-10":"images/werk-10.webp", "werk-11":"images/werk-11.webp",
+  "bts-01":"images/bts-01.webp", "bts-02":"images/bts-02.webp", "bts-03":"images/bts-03.webp", "bts-04":"images/bts-04.webp", "bts-05":"images/bts-05.webp", "bts-06":"images/bts-06.webp", "bts-07":"images/bts-07.webp", "bts-08":"images/bts-08.webp", "bts-09":"images/bts-09.webp", "bts-10":"images/bts-10.webp", "bts-11":"images/bts-11.webp"
+};
+
+/* ======================================================
+   TEKSTEN — Nederlands, English, Português
+   ====================================================== */
+const TXT = {
+nl:{
+  "vals.intro":"Mijn ontwerpwaarden bepalen hoe ik keuzes maak. Eerst begrijpen, bewust vormgeven, verbinding creëren en inspiratie halen uit de wereld om me heen. Samen vormen ze de basis van mijn werk.",
+  "vals.title":"Mijn ontwerpwaarden",
+  "pr.sub":"Elke golf begint met een stevig fundament. Zo maak ik van inzichten ontwerp dat impact maakt.",
+  "nav.cases":"Cases","nav.about":"Over mij","nav.contact":"Contact",
+  "hero.sub":"Van fundament naar beweging.","hero.cta":"Bekijk de cases",
+  "ph.portrait":"Portret van Thomas",
+  "cases.title":"Cases","c.more":"Bekijk case",
+  "c.onze":"Een eigen streetwearlabel geïnspireerd op de voetbalcultuur van Rio.",
+  "c.fp":"Een herkenbare socialmedia-identiteit voor een groeiend voetbalplatform.",
+  "c.cc":"Een festivalidentiteit die Braziliaanse cultuur en studenten samenbrengt.",
+  "mq":["Merk","Concept","Digitaal","Utrecht","Rio de Janeiro"],
+  "pr.title":"Steen voor <span class=\"acc\">steen.</span>",
+  "s1.t":"Begrijpen","s1.p":"Ik onderzoek de doelgroep, de context en het probleem. Wat speelt er, wat hebben mensen nodig en waar liggen kansen?",
+  "s2.t":"Het idee vinden","s2.p":"Ik vertaal inzichten naar een concept en vergelijk verschillende richtingen. Zo maak ik bewuste keuzes voordat ik verder ontwerp.",
+  "s3.t":"Tot leven brengen","s3.p":"Ik werk de gekozen richting uit tot een herkenbare visuele identiteit of digitaal ontwerp, van de eerste opzet tot de details.",
+  "s4.t":"Make waves","s4.p":"Ik leg mijn werk voor aan gebruikers, verzamel feedback en verbeter waar nodig. Zo wordt het ontwerp steeds sterker.",
+  "mw.title":"Meer werk","mw.item":"Werk",
+  "ab.title":"Over mij",
+  "ab.lead":"Ik ben Thomas van Bemmel (23), merk- en digitaal ontwerper uit Utrecht. Ik ontwerp merken en digitale ervaringen waarin mensen zichzelf herkennen.",
+  "ab.p1":"Mijn achtergrond ligt in marketing en redactie. Daar ontdekte ik hoe belangrijk het verhaal achter een merk is. Tijdens mijn studie Communication & Multimedia Design ben ik dat gaan combineren met visueel ontwerp. Ik wil niet alleen weten hoe iets eruit moet zien, maar vooral waarom het werkt en voor wie.",
+  "ab.p2":"Ik denk graag vanuit een sterk concept en werk dat stap voor stap visueel uit. Daarbij experimenteer ik met verschillende richtingen, test ik mijn ideeën en gebruik ik feedback om mijn ontwerpen scherper te maken. Ik ben kritisch op mijn eigen werk en zoek naar de balans tussen een herkenbare uitstraling en een ontwerp dat daadwerkelijk iets toevoegt.",
+  "ab.p3":"Sport en cultuur zijn belangrijke inspiratiebronnen, met voetbal als grote passie. Die interesses komen samen in mijn werk voor FootballPlace en mijn eigen kledinglabel Projeto Onze, dat ik tijdens mijn minor Ondernemerschap ontwikkel voor de Braziliaanse markt. Ook mijn band met Rio de Janeiro speelt daarin een belangrijke rol. Samen met mijn Utrechtse achtergrond vormt die de basis van mijn persoonlijke ontwerpidentiteit.",
+  "sg.title":"Steen <span class=\"acc\">×</span> Golf",
+  "sg.p":"<p>Mijn persoonlijke identiteit brengt twee plekken samen: Utrecht, waar mijn basis ligt, en Rio de Janeiro, een stad die me inspireert. De bakstenen van Utrecht staan voor het fundament: onderzoeken, opbouwen en verfijnen. De golvende patronen van Copacabana staan voor beweging, creativiteit en verbinding.</p><p>In de dubbele M van mijn logo komen deze elementen samen. Het resultaat is een combinatie van structuur en beweging, precies zoals ik graag ontwerp.</p>",
+  "v1.t":"Eerst waarom","v1.p":"Goed ontwerp begint bij begrijpen. Ik onderzoek de mensen, het doel en het probleem voordat ik keuzes maak.",
+  "v2.t":"Minder, maar beter","v2.p":"Elk element moet een doel hebben. Ik haal weg wat overbodig is, zodat het belangrijke opvalt.",
+  "v3.t":"Verbondenheid creëren","v3.p":"Ik ontwerp identiteiten waarin mensen zichzelf herkennen. Want de sterkste merken geven mensen het gevoel dat ze ergens bij horen.",
+  "v4.t":"Cultuur als brandstof","v4.p":"Cultuur, gemeenschappen en het dagelijks leven inspireren mijn werk. Ik vertaal echte verhalen naar betekenisvol ontwerp.",
+  "bts.title":"Achter de schermen","bts.item":"Foto",
+  "ct.title":"Let's make<br><span class=\"acc\">waves.</span>",
+  "ct.p":"Een project, een samenwerking of een goed idee? Stuur me een bericht.","ct.btn":"Mail mij",
+  "ft.top":"Terug naar boven",
+  "ui.close":"Sluiten","ui.challenge":"Uitdaging","ui.approach":"Aanpak","ui.result":"Resultaat",
+  "ui.guide":"Brandguide","ui.next":"Volgende case","ui.role":"Rol","ui.context":"Context","ui.year":"Jaar","ui.page":"Pagina","ui.image":"Beeld","ui.chosen":"Gekozen","ui.reflection":"Reflectie"
+},
+en:{
+  "vals.intro":"My design values shape how I make choices. Understand first, design with intent, create connection and draw inspiration from the world around me. Together, they form the foundation of my work.",
+  "vals.title":"My design values",
+  "pr.sub":"Every wave starts with a strong foundation. Here's how I turn insights into design that makes an impact.",
+  "nav.cases":"Cases","nav.about":"About","nav.contact":"Contact",
+  "hero.sub":"From foundation to movement.","hero.cta":"See the cases",
+  "ph.portrait":"Portrait of Thomas",
+  "cases.title":"Cases","c.more":"View case",
+  "c.onze":"My own streetwear label inspired by Rio's football culture.",
+  "c.fp":"A recognisable social media identity for a growing football platform.",
+  "c.cc":"A festival identity that brings Brazilian culture and students together.",
+  "mq":["Brand","Concept","Digital","Utrecht","Rio de Janeiro"],
+  "pr.title":"Brick by <span class=\"acc\">brick.</span>",
+  "s1.t":"Understand","s1.p":"I research the audience, the context and the problem. What's going on, what do people need and where are the opportunities?",
+  "s2.t":"Find the idea","s2.p":"I turn insights into a concept and compare different directions. That way I make deliberate choices before designing further.",
+  "s3.t":"Bring it to life","s3.p":"I develop the chosen direction into a recognisable visual identity or digital design, from the first draft to the details.",
+  "s4.t":"Make waves","s4.p":"I show my work to users, gather feedback and improve where needed. That way the design keeps getting stronger.",
+  "mw.title":"More work","mw.item":"Work",
+  "ab.title":"About",
+  "ab.lead":"I'm Thomas van Bemmel (23), a brand and digital designer from Utrecht. I design brands and digital experiences that people recognise themselves in.",
+  "ab.p1":"My background is in marketing and editorial work. That's where I discovered how important the story behind a brand is. During my studies in Communication & Multimedia Design, I started combining that with visual design. I don't just want to know how something should look, but above all why it works and for whom.",
+  "ab.p2":"I like to start from a strong concept and develop it visually, step by step. Along the way I experiment with different directions, test my ideas and use feedback to make my designs sharper. I'm critical of my own work and look for the balance between a recognisable look and a design that actually adds something.",
+  "ab.p3":"Sport and culture are important sources of inspiration, with football as my big passion. Those interests come together in my work for FootballPlace and in my own clothing label Projeto Onze, which I'm developing for the Brazilian market during my minor in Entrepreneurship. My bond with Rio de Janeiro plays an important role in that too. Together with my Utrecht roots, it forms the basis of my personal design identity.",
+  "sg.title":"Brick <span class=\"acc\">×</span> Wave",
+  "sg.p":"<p>My personal identity brings two places together: Utrecht, where my roots are, and Rio de Janeiro, a city that inspires me. The bricks of Utrecht stand for the foundation: researching, building and refining. The wave patterns of Copacabana stand for movement, creativity and connection.</p><p>These elements come together in the double M of my logo. The result is a combination of structure and movement, exactly how I like to design.</p>",
+  "v1.t":"Why first","v1.p":"Good design starts with understanding. I explore the people, purpose and problem before making decisions.",
+  "v2.t":"Less, but better","v2.p":"Every element needs a purpose. I strip away the unnecessary to make the important stand out.",
+  "v3.t":"Create belonging","v3.p":"I design identities people recognise themselves in. Because the strongest brands make people feel part of something.",
+  "v4.t":"Culture as fuel","v4.p":"Culture, communities and everyday life inspire my work. I turn real stories into meaningful design.",
+  "bts.title":"Behind the scenes","bts.item":"Photo",
+  "ct.title":"Let's make<br><span class=\"acc\">waves.</span>",
+  "ct.p":"A project, a collaboration or a good idea? Send me a message.","ct.btn":"Email me",
+  "ft.top":"Back to top",
+  "ui.close":"Close","ui.challenge":"Challenge","ui.approach":"Approach","ui.result":"Result",
+  "ui.guide":"Brand guide","ui.next":"Next case","ui.role":"Role","ui.context":"Context","ui.year":"Year","ui.page":"Page","ui.image":"Image","ui.chosen":"Chosen","ui.reflection":"Reflection"
+},
+pt:{
+  "vals.intro":"Meus valores de design definem como faço minhas escolhas. Primeiro entender, criar com intenção, gerar conexão e buscar inspiração no mundo ao meu redor. Juntos, eles formam a base do meu trabalho.",
+  "vals.title":"Meus valores de design",
+  "pr.sub":"Toda onda começa com uma base sólida. É assim que transformo descobertas em design que causa impacto.",
+  "nav.cases":"Projetos","nav.about":"Sobre mim","nav.contact":"Contato",
+  "hero.sub":"Da base ao movimento.","hero.cta":"Ver os projetos",
+  "ph.portrait":"Retrato do Thomas",
+  "cases.title":"Projetos","c.more":"Ver projeto",
+  "c.onze":"Uma marca própria de streetwear inspirada na cultura do futebol do Rio.",
+  "c.fp":"Uma identidade reconhecível nas redes para uma plataforma de futebol em crescimento.",
+  "c.cc":"Uma identidade de festival que aproxima a cultura brasileira e os estudantes.",
+  "mq":["Marca","Conceito","Digital","Utrecht","Rio de Janeiro"],
+  "pr.title":"Tijolo por <span class=\"acc\">tijolo.</span>",
+  "s1.t":"Entender","s1.p":"Pesquiso o público, o contexto e o problema. O que está acontecendo, do que as pessoas precisam e onde estão as oportunidades?",
+  "s2.t":"Encontrar a ideia","s2.p":"Transformo descobertas em um conceito e comparo diferentes direções. Assim faço escolhas conscientes antes de seguir com o design.",
+  "s3.t":"Dar vida","s3.p":"Desenvolvo a direção escolhida até virar uma identidade visual reconhecível ou um design digital, do primeiro esboço aos detalhes.",
+  "s4.t":"Make waves","s4.p":"Mostro meu trabalho para os usuários, coleto feedback e melhoro onde for preciso. Assim o design fica cada vez mais forte.",
+  "mw.title":"Mais trabalhos","mw.item":"Trabalho",
+  "ab.title":"Sobre mim",
+  "ab.lead":"Sou Thomas van Bemmel (23), designer de marca e digital de Utrecht. Crio marcas e experiências digitais nas quais as pessoas se reconhecem.",
+  "ab.p1":"Minha formação é em marketing e redação. Foi lá que descobri a importância da história por trás de uma marca. No curso de Communication & Multimedia Design, comecei a unir isso ao design visual. Não quero saber só como algo deve parecer, mas principalmente por que funciona e para quem.",
+  "ab.p2":"Gosto de partir de um conceito forte e desenvolvê-lo visualmente, passo a passo. No caminho, experimento diferentes direções, testo minhas ideias e uso o feedback para deixar meus designs mais afiados. Sou crítico com o meu próprio trabalho e busco o equilíbrio entre uma identidade reconhecível e um design que realmente acrescenta algo.",
+  "ab.p3":"Esporte e cultura são fontes importantes de inspiração, com o futebol como grande paixão. Esses interesses se encontram no meu trabalho para a FootballPlace e na minha própria marca de roupas, a Projeto Onze, que desenvolvo para o mercado brasileiro durante o minor em Empreendedorismo. Minha ligação com o Rio de Janeiro também tem um papel importante nisso. Junto com as minhas raízes em Utrecht, ela forma a base da minha identidade pessoal como designer.",
+  "sg.title":"Tijolo <span class=\"acc\">×</span> Onda",
+  "sg.p":"<p>Minha identidade pessoal une dois lugares: Utrecht, onde estão as minhas raízes, e o Rio de Janeiro, uma cidade que me inspira. Os tijolos de Utrecht representam a base: pesquisar, construir e refinar. Os padrões ondulados de Copacabana representam movimento, criatividade e conexão.</p><p>No duplo M do meu logo, esses elementos se encontram. O resultado é uma combinação de estrutura e movimento, exatamente como eu gosto de criar.</p>",
+  "v1.t":"Primeiro o porquê","v1.p":"Um bom design começa pelo entendimento. Eu investigo as pessoas, o propósito e o problema antes de tomar decisões.",
+  "v2.t":"Menos, porém melhor","v2.p":"Cada elemento precisa de um propósito. Eu retiro o que é desnecessário para que o importante se destaque.",
+  "v3.t":"Criar pertencimento","v3.p":"Eu crio identidades nas quais as pessoas se reconhecem. Porque as marcas mais fortes fazem as pessoas se sentirem parte de algo.",
+  "v4.t":"Cultura como combustível","v4.p":"Cultura, comunidades e o dia a dia inspiram o meu trabalho. Eu transformo histórias reais em design com significado.",
+  "bts.title":"Bastidores","bts.item":"Foto",
+  "ct.title":"Let's make<br><span class=\"acc\">waves.</span>",
+  "ct.p":"Um projeto, uma parceria ou uma boa ideia? Me mande uma mensagem.","ct.btn":"Me escreva",
+  "ft.top":"Voltar ao topo",
+  "ui.close":"Fechar","ui.challenge":"Desafio","ui.approach":"Abordagem","ui.result":"Resultado",
+  "ui.guide":"Manual da marca","ui.next":"Próximo projeto","ui.role":"Função","ui.context":"Contexto","ui.year":"Ano","ui.page":"Página","ui.image":"Imagem","ui.chosen":"Escolhida","ui.reflection":"Reflexão"
+}};
+
+/* placeholder-tekst voor ontbrekende inhoud */
+const T = s => `<mark class="todo">[${s}]</mark>`;
+
+const CASES = {
+ onze:{ title:"Projeto Onze", hero:"", logo:"onze-cover", ring:["#12924a","#3b36a8","#f5c400"], visuals:[], guide:19, key:"onze",
+  intro:{nl:"Mijn eigen kledinglabel, opgezet in Rio de Janeiro. Onze is Portugees voor elf: het aantal spelers in een team.",
+         en:"My own clothing label, set up in Rio de Janeiro. Onze is Portuguese for eleven: the number of players in a team.",
+         pt:"Minha própria marca de roupas, criada no Rio de Janeiro. Onze é o número de jogadores de um time."},
+  meta:{nl:[["Rol","Oprichter en ontwerper"],["Context","Minor Ondernemerschap"],["Jaar","2026"]],
+        en:[["Role","Founder and designer"],["Context","Minor in Entrepreneurship"],["Year","2026"]],
+        pt:[["Função","Fundador e designer"],["Contexto","Minor em Empreendedorismo"],["Ano","2026"]]},
+  blocks:{nl:["Voetbal is overal in Rio de Janeiro, maar kleding waarmee fans hun liefde voor de sport laten zien, is vaak gekoppeld aan een specifieke club. Ik zag ruimte voor een streetwearlabel dat juist de cultuur rondom het voetbal centraal stelt: de verhalen, plekken en momenten die verder gaan dan de wedstrijd.",
+              "Ik onderzocht de doelgroep, sprak met jongeren uit Rio en ontwikkelde verschillende richtingen voor de merkidentiteit. Door logo's, merkwaarden en ontwerpen te testen, werkte ik stap voor stap naar een herkenbaar merkconcept. Vanuit die identiteit ontwikkelde ik de eerste collectie, een brandguide en een interactieve webshop.",
+              "Een uitgewerkte merkidentiteit voor Projeto Onze, met drie shirtontwerpen, een brandguide van 36 pagina's en een drietalig webshopconcept met een 3D-kledingrek. Het merk bevindt zich momenteel in de test- en ontwikkelfase."],
+          en:["Football is everywhere in Rio de Janeiro, but the clothes fans wear to show their love for the game are usually tied to a specific club. I saw room for a streetwear label that puts the culture around football at the centre: the stories, places and moments that go beyond the match.",
+              "I researched the audience, talked with young people from Rio and developed several directions for the brand identity. By testing logos, brand values and designs, I worked step by step towards a recognisable brand concept. From that identity, I developed the first collection, a brand guide and an interactive online shop.",
+              "A fully developed brand identity for Projeto Onze, with three shirt designs, a 36-page brand guide and a trilingual online shop concept with a 3D clothing rack. The brand is currently in its testing and development phase."],
+          pt:["O futebol está em todo lugar no Rio de Janeiro, mas as roupas com que os torcedores mostram seu amor pelo esporte quase sempre estão ligadas a um clube específico. Vi espaço para uma marca de streetwear que coloca no centro a cultura em torno do futebol: as histórias, os lugares e os momentos que vão além da partida.",
+              "Pesquisei o público, conversei com jovens do Rio e desenvolvi diferentes direções para a identidade da marca. Testando logos, valores e designs, cheguei passo a passo a um conceito de marca reconhecível. A partir dessa identidade, desenvolvi a primeira coleção, um manual da marca e uma loja online interativa.",
+              "Uma identidade de marca completa para a Projeto Onze, com três camisetas, um manual da marca de 36 páginas e um conceito de loja online em três idiomas com uma arara 3D. A marca está atualmente em fase de testes e desenvolvimento."]},
+  chapters:[
+   {id:"onze-onderzoek",
+    title:{nl:"Voetbal draag je als clubshirt",en:"Football is worn as a club shirt",pt:"Futebol se veste com a camisa do clube"},
+    spine:{nl:"Onderzoek",en:"Research",pt:"Pesquisa"},
+    text:{nl:["In Rio zie je overal voetbal: op de pleintjes, op de tribune en op straat. Laat je zien dat je van voetbal houdt, dan doe je dat bijna altijd met een clubshirt. Op je werk, op de universiteit of op een avond uit past dat vaak niet.","Mijn doelgroep zijn jongeren in Rio van ongeveer 18 tot 30, voor wie voetbal bij het dagelijks leven hoort en die zich in streetwear kleden. Fanshops verkopen een club, sportmerken verkopen prestaties. Daartussen zag ik ruimte voor een label over de voetbalcultuur zelf: de plekken en wedstrijden, niet één club."],
+          en:["In Rio, football is everywhere: on the small neighbourhood pitches, in the stands and on the street. People who show their love for football almost always do it with a club shirt, which often doesn't fit at work, at university or on a night out.","My audience is young people in Rio, roughly 18 to 30, for whom football is part of daily life and who dress in streetwear. Fan shops sell a club, sports brands sell performance. In between, I saw room for a label about football culture itself: the places and the matches, not one club."],
+          pt:["No Rio, o futebol está em todo lugar: nas quadras, nas arquibancadas e na rua. Quem mostra que ama futebol quase sempre faz isso com a camisa do clube, que muitas vezes não combina com o trabalho, a faculdade ou uma noite fora.","Meu público são jovens do Rio, de uns 18 a 30 anos, para quem o futebol faz parte do dia a dia e que se vestem com streetwear. Lojas de torcedor vendem um clube, marcas esportivas vendem desempenho. Entre os dois, vi espaço para uma marca sobre a própria cultura do futebol: os lugares e os jogos, não um clube."]},
+    parts:[{t:"cm",layout:"g2",media:[["onze-guide-7",{nl:"Persoonlijkheid en doelgroep",en:"Personality and audience",pt:"Personalidade e público"}],["onze-guide-4",{nl:"Waarom Onze, missie en visie",en:"Why Onze, mission and vision",pt:"Por que Onze, missão e visão"}]]}]},
+   {id:"onze-identiteit",
+    title:{nl:"Een naam, een slogan en drie waarden",en:"A name, a slogan and three values",pt:"Um nome, um slogan e três valores"},
+    spine:{nl:"Identiteit",en:"Identity",pt:"Identidade"},
+    text:{nl:["De naam Projeto Onze betekent Project Elf: elf spelers, elk met een eigen plek. De slogan Não é só pra dia de jogo (niet alleen voor wedstrijddag) zegt waar de kleding voor is: voor alle andere dagen.","Drie merkwaarden sturen elke keuze, van print tot pasvorm. Ze hebben Portugese namen, omdat het merk uit Rio komt, en elk een eigen kleur uit de badge: groen, indigo en goud."],
+          en:["The name Projeto Onze means Project Eleven: eleven players, each with their own place. The slogan Não é só pra dia de jogo (not just for match day) says what the clothes are for: all the other days.","Three brand values guide every choice, from print to fit. They have Portuguese names because the brand comes from Rio, and each has its own colour from the badge: green, indigo and gold."],
+          pt:["O nome Projeto Onze vem dos onze jogadores de um time, cada um com seu lugar. O slogan Não é só pra dia de jogo diz para que servem as roupas: para todos os outros dias.","Três valores guiam cada escolha, da estampa ao caimento. Cada um tem uma cor do escudo: verde, anil e ouro."]},
+    parts:[{t:"cards",items:{
+      nl:[["Todo mundo tem lugar","Iedereen heeft een plek. Je hoeft geen clubfan te zijn: geen clublogo's, en één ruime pasvorm in zes maten."],["Coletivo","Samen. Makers uit Rio werken mee, en kopers praten mee over de volgende drop."],["Pra todo dia","Voor elke dag. Een rustige basis, één sterke print en stof die vaak wassen aankan."]],
+      en:[["Todo mundo tem lugar","Everyone has a place. You don't have to be a club fan: no club logos, and one roomy fit in six sizes."],["Coletivo","Together. Makers from Rio take part, and buyers help shape the next drop."],["Pra todo dia","For every day. A calm base, one strong print and fabric that lasts wash after wash."]],
+      pt:[["Todo mundo tem lugar","Não precisa ser torcedor de um clube: sem escudos, e um caimento amplo em seis tamanhos."],["Coletivo","Gente do Rio participa da criação, e quem compra ajuda a definir o próximo drop."],["Pra todo dia","Uma base tranquila, uma estampa forte e um tecido que aguenta muitas lavagens."]]}},
+     {t:"cm",layout:"g2",media:[["onze-guide-5",{nl:"Todo mundo tem lugar",en:"Todo mundo tem lugar",pt:"Todo mundo tem lugar"}],["onze-guide-6",{nl:"Coletivo en Pra todo dia",en:"Coletivo and Pra todo dia",pt:"Coletivo e Pra todo dia"}]]}]},
+   {id:"onze-beeldtaal",
+    title:{nl:"Van badge tot patroon",en:"From badge to pattern",pt:"Do escudo ao padrão"},
+    spine:{nl:"Beeldtaal",en:"Visual language",pt:"Linguagem visual"},
+    text:{nl:["Het logo is een ronde badge, zoals het embleem van een club, met een monogram en drie balkjes in de kleuren van de merkwaarden. Daaromheen koos ik een donker, rustig palet en vier lettertypes.","Het hoofdpatroon is Calçadão: de zwart-witte golven van de stoep langs de stranden van Rio. De twee bijpatronen komen uit mijn eigen prints: het warmtebeeld uit Heatmap en een gebreide supporterssjaal (cachecol)."],
+          en:["The logo is a round badge, like a club crest, with a monogram and three bars in the colours of the brand values. Around it I chose a dark, calm palette and four typefaces.","The main pattern is Calçadão: the black-and-white waves of the pavement along Rio's beaches. The two supporting patterns come from my own prints: the thermal image from Heatmap and a knitted supporters' scarf (cachecol)."],
+          pt:["O logo é um escudo redondo, como o de um clube, com um monograma e três barras nas cores dos valores. Em volta escolhi uma paleta escura e tranquila e quatro fontes.","O padrão principal é o Calçadão: as ondas em preto e branco das calçadas da orla do Rio. Os dois padrões de apoio vêm das minhas estampas: a imagem térmica da Heatmap e um cachecol de torcida."]},
+    parts:[{t:"cm",layout:"g2",media:[["onze-guide-11",{nl:"Kleuren en letters",en:"Colours and type",pt:"Cores e tipografia"}],["onze-guide-12",{nl:"Calçadão en de bijpatronen",en:"Calçadão and the supporting patterns",pt:"Calçadão e os padrões de apoio"}]]}]},
+   {id:"onze-ontwerp", wip:true,
+    title:{nl:"Vanuit de identiteit naar drie shirts",en:"From the identity to three shirts",pt:"Da identidade a três camisetas"},
+    spine:{nl:"Ontwerpen",en:"Design",pt:"Design"},
+    text:{nl:["Met de identiteit als basis ontwierp ik de eerste collectie: Coleção 01 · Primeiro Tempo (collectie 01, eerste helft). Elk shirt gaat over één voetbalmoment uit Rio, zonder clublogo's, en elk in een andere techniek. Voorop klein, achterop groot; alleen Heatmap heeft één grote print voorop.","Heatmap laat twee spelers zien als warmtebeeld. Fora de Temporada (buiten het seizoen) is een leeg pleintje in Rio. Clássico das Multidões (de derby van de massa) is Fla-Flu, Flamengo tegen Fluminense, in het Maracanã. De prints ontwierp ik in Make Studio, mijn eigen 3D-ontwerptool, zodat ik ze meteen op een gedrapeerd shirt zag."],
+          en:["With the identity as the foundation, I designed the first collection: Coleção 01 · Primeiro Tempo (collection 01, first half). Each shirt is about one football moment from Rio, without club logos, each in a different technique. Small on the front, large on the back; only Heatmap has one large print on the front.","Heatmap shows two players as a thermal image. Fora de Temporada (out of season) is an empty neighbourhood pitch in Rio. Clássico das Multidões (the derby of the crowds) is Fla-Flu, Flamengo against Fluminense, at the Maracanã. I designed the prints in Make Studio, my own 3D design tool, so I could see them on a draped shirt straight away."],
+          pt:["Com a identidade como base, criei a primeira coleção: Coleção 01 · Primeiro Tempo. Cada camiseta fala de um momento do futebol carioca, sem escudos de clubes, cada uma numa técnica. Na frente pequeno, atrás grande; só a Heatmap tem uma estampa grande na frente.","A Heatmap mostra dois jogadores como imagem térmica. Fora de Temporada é uma quadra vazia no Rio. Clássico das Multidões é o Fla-Flu no Maracanã. Criei as estampas no Make Studio, minha própria ferramenta de design 3D, para vê-las na hora numa camiseta com caimento real."]},
+    parts:[{t:"cm",layout:"g3",media:[["onze-shirt-1",{nl:"Heatmap",en:"Heatmap",pt:"Heatmap"}],["onze-shirt-2",{nl:"Fora de Temporada",en:"Fora de Temporada",pt:"Fora de Temporada"}],["onze-shirt-3",{nl:"Clássico das Multidões",en:"Clássico das Multidões",pt:"Clássico das Multidões"}]]}]},
+   {id:"onze-drop", wip:true,
+    title:{nl:"De eerste drop: rek, shop en brandguide",en:"The first drop: rack, shop and brand guide",pt:"O primeiro drop: arara, loja e manual"},
+    spine:{nl:"Eerste drop",en:"First drop",pt:"Primeiro drop"},
+    text:{nl:["Voor de eerste drop bouwde ik een website waarvan de homepage een 3D-kledingrek in een kleedkamer is. Klik een shirt aan en je ziet voor- en achterkant, kiest je maat en legt hem in je tas. Daarachter zit een webshop, in drie talen en met prijzen in reais of euro. Hierboven kun je hem zelf proberen.","Alles ligt vast in een brandguide: een A5-boekje van 36 pagina's om te drukken. De vormen komen uit het voetbal: de inhoud is een opstelling, de persoonlijkheid een spelerskaart, en wat niet mag staat op gele kaarten. Een apart hoofdstuk legt de website vast."],
+          en:["For the first drop I built a website whose homepage is a 3D clothing rack in a changing room. Click a shirt to see the front and back, pick your size and add it to your bag. Behind it is a web shop, in three languages with prices in reais or euros. You can try it yourself above.","Everything is set out in a brand guide: a 36-page A5 booklet made for print. Its forms come from football: the contents are a line-up, the personality is a player card, and the don'ts are on yellow cards. A separate chapter covers the website."],
+          pt:["Para o primeiro drop criei um site cuja página inicial é uma arara 3D num vestiário. Clique numa camiseta para ver frente e costas, escolher o tamanho e colocar na sacola. Por trás há uma loja online em três idiomas, com preços em reais ou euros. Você pode testar aqui em cima.","Tudo está definido num manual da marca: um livreto A5 de 36 páginas, feito para imprimir. As formas vêm do futebol: o sumário é uma escalação, a personalidade é uma carta de jogador e o que não pode está em cartões amarelos. Um capítulo à parte define o site."]},
+    parts:[{t:"guide"}]},
+  ],
+  reflection:{nl:"Projeto Onze heeft me geleerd om verder te kijken dan de visuele identiteit van een merk. Ik moet niet alleen keuzes maken als ontwerper, maar ook nadenken over de doelgroep, het product en de haalbaarheid van mijn ideeën. Door verschillende richtingen te testen, ontdekte ik hoe belangrijk het is om vast te houden aan een sterk concept, maar tegelijkertijd open te blijven staan voor feedback. De volgende stap is om die merkidentiteit ook in de praktijk waar te maken, van pasvorm en kwaliteit tot de ervaring in de webshop.",
+              en:"Projeto Onze taught me to look beyond a brand's visual identity. I don't just have to make choices as a designer, but also think about the audience, the product and whether my ideas are feasible. By testing different directions, I discovered how important it is to hold on to a strong concept while staying open to feedback. The next step is to make that brand identity real in practice, from fit and quality to the experience in the online shop.",
+              pt:"A Projeto Onze me ensinou a olhar além da identidade visual de uma marca. Não basta fazer escolhas como designer: também preciso pensar no público, no produto e na viabilidade das minhas ideias. Testando diferentes direções, descobri como é importante manter um conceito forte e, ao mesmo tempo, continuar aberto ao feedback. O próximo passo é tornar essa identidade real na prática, do caimento e da qualidade à experiência na loja online."}
+ },
+ fp:{ title:"FootballPlace", hero:"fp-hero", ring:["#6BAF45","#E9ECF8"], visuals:[], guide:25, key:"fp",
+  intro:{nl:"Een herkenbare socialmedia-identiteit voor een groeiend voetbalplatform.",
+         en:"A recognisable social media identity for a growing football platform.",
+         pt:"Uma identidade reconhecível nas redes para uma plataforma de futebol em crescimento."},
+  meta:{nl:[["Rol","Social media & grafisch ontwerp"],["Context","Stage"],["Jaar","2026"]],
+        en:[["Role","Social media & graphic design"],["Context","Internship"],["Year","2026"]],
+        pt:[["Função","Social media & design gráfico"],["Contexto","Estágio"],["Ano","2026"]]},
+  blocks:{nl:["FootballPlace was een groeiend Premier League-nieuwsplatform, maar miste op social media een consistente visuele identiteit en duidelijke contentstrategie. Mijn opdracht was om het merk herkenbaarder te maken, een jonger publiek te bereiken en formats te ontwikkelen die snel en efficiënt geproduceerd konden worden.",
+              "Ik onderzocht de doelgroep en andere voetbalmedia en ontwikkelde drie visuele richtingen. Deze testte ik met voetbalfans en een ontwerpexpert. Op basis van hun feedback koos ik voor een combinatie van herkenbare clubkleuren en vaste FootballPlace-elementen. Die stijl vertaalde ik naar twaalf herbruikbare formats en een socialmedia-brandguide.",
+              "Een herkenbaar contentsysteem voor Instagram en TikTok, met duidelijke ontwerprichtlijnen en een bijbehorende contentstrategie. In de eerste maand behaalde het TikTok-account ruim 30.000 likes, waarbij één video 970.000 weergaven bereikte."],
+          en:["FootballPlace was a growing Premier League news platform, but on social media it lacked a consistent visual identity and a clear content strategy. My brief was to make the brand more recognisable, reach a younger audience and develop formats that could be produced quickly and efficiently.",
+              "I researched the audience and other football media and developed three visual directions. I tested these with football fans and a design expert. Based on their feedback, I chose a combination of recognisable club colours and fixed FootballPlace elements. I translated that style into twelve reusable formats and a social media brand guide.",
+              "A recognisable content system for Instagram and TikTok, with clear design guidelines and a matching content strategy. In its first month, the TikTok account gained more than 30,000 likes, with one video reaching 970,000 views."],
+          pt:["A FootballPlace era uma plataforma de notícias da Premier League em crescimento, mas nas redes sociais faltavam uma identidade visual consistente e uma estratégia de conteúdo clara. Meu desafio era tornar a marca mais reconhecível, alcançar um público mais jovem e desenvolver formatos que pudessem ser produzidos de forma rápida e eficiente.",
+              "Pesquisei o público e outras mídias de futebol e desenvolvi três direções visuais. Testei essas direções com torcedores e um especialista em design. Com base no feedback, escolhi uma combinação de cores reconhecíveis dos clubes com elementos fixos da FootballPlace. Traduzi esse estilo em doze formatos reutilizáveis e um manual da marca para as redes.",
+              "Um sistema de conteúdo reconhecível para Instagram e TikTok, com diretrizes de design claras e uma estratégia de conteúdo. No primeiro mês, a conta do TikTok passou de 30 mil curtidas, e um vídeo chegou a 970 mil visualizações."]},
+  chapters:[
+   {id:"onderzoek", layout:"g2",
+    title:{nl:"Onderzoek & strategie",en:"Research & strategy",pt:"Pesquisa & estratégia"},
+    spine:{nl:"Onderzoek",en:"Research",pt:"Pesquisa"},
+    text:{nl:["Voordat ik ging ontwerpen, onderzocht ik het publiek, de websiteprestaties en de positie van FootballPlace tussen voetbalmedia als 433, Sky Sports, ESPN en VoetbalPrimeur.","Zo kreeg elk kanaal een eigen rol: TikTok om nieuw publiek te bereiken, Instagram om herkenbaarheid en community op te bouwen."],
+          en:["Before designing, I looked at the audience, the website's performance and FootballPlace's position among football media such as 433, Sky Sports, ESPN and VoetbalPrimeur.","This gave each channel its own role: TikTok to reach new audiences, Instagram to build recognition and community."],
+          pt:["Antes de desenhar, estudei o público, o desempenho do site e a posição da FootballPlace entre mídias de futebol como 433, Sky Sports, ESPN e VoetbalPrimeur.","Assim, cada canal ganhou seu papel: o TikTok para alcançar novos públicos, o Instagram para construir reconhecimento e comunidade."]},
+    media:[["fp-onderzoek-1",{nl:"Merkidentiteit: missie, visie en uitdaging",en:"Brand identity: mission, vision and challenge",pt:"Identidade: missão, visão e desafio"}],
+           ["fp-onderzoek-2",{nl:"Waarden voor social media",en:"Social media values",pt:"Valores para as redes"}]]},
+   {id:"richtingen", layout:"dirs",
+    title:{nl:"Drie richtingen",en:"Three directions",pt:"Três direções"},
+    spine:{nl:"Identiteit",en:"Identity",pt:"Identidade"},
+    text:{nl:["Ik werkte drie richtingen uit, van volledig in merkstijl tot extra minimalistisch. Voetbalfans en een expert uit het vak beoordeelden ze op kleur, compositie en herkenbaarheid.","De uiteindelijke stijl combineert herkenbare clubkleuren met vaste FootballPlace-elementen, zodat het merk altijd zichtbaar blijft."],
+          en:["I developed three directions, from fully branded to extra minimal. Football fans and an industry expert reviewed them on colour, composition and recognisability.","The final style combines recognisable club colours with consistent FootballPlace elements, so the brand always stays visible."],
+          pt:["Desenvolvi três direções, de totalmente com a marca a extra minimalista. Torcedores e um especialista da área avaliaram cor, composição e reconhecimento.","O estilo final combina cores reconhecíveis dos clubes com elementos fixos da FootballPlace, para que a marca esteja sempre visível."]},
+    groups:[{label:{nl:"Volledig in merkstijl",en:"Fully branded",pt:"Totalmente com a marca"},key:"fp-r1"},
+            {label:{nl:"Minimalistisch",en:"Minimal",pt:"Minimalista"},key:"fp-r2"},
+            {label:{nl:"Extra minimalistisch",en:"Extra minimal",pt:"Extra minimalista"},key:"fp-r3"}]},
+   {id:"formats", layout:"g3",
+    title:{nl:"Een contentsysteem",en:"A content system",pt:"Um sistema de conteúdo"},
+    spine:{nl:"Contentsysteem",en:"Content system",pt:"Sistema de conteúdo"},
+    text:{nl:["Die richting vertaalde ik naar herbruikbare formats. Elk format brengt voetbalnieuws helder en herkenbaar, en is snel opnieuw te maken."],
+          en:["I translated that direction into reusable formats. Each one presents football news clearly and recognisably, and is quick to reproduce."],
+          pt:["Transformei essa direção em formatos reutilizáveis. Cada um apresenta o noticiário de futebol de forma clara e reconhecível, e é rápido de reproduzir."]},
+    media:[["fp-format-1",{nl:"Combined XI",en:"Combined XI",pt:"Combined XI"}],
+           ["fp-format-2",{nl:"Spelersstatistieken",en:"Player stats",pt:"Estatísticas de jogadores"}],
+           ["fp-format-3",{nl:"Resterend programma",en:"Run-in fixtures",pt:"Jogos restantes"}],
+           ["fp-format-4",{nl:"Vorm",en:"Form guide",pt:"Fase recente"}],
+           ["fp-format-5",{nl:"Discussievraag",en:"Debate post",pt:"Post de debate"}],
+           ["fp-format-6",{nl:"Seizoensvergelijking",en:"Season comparison",pt:"Comparação de temporadas"}]]},
+   {id:"testen", layout:"tt", stats:true,
+    title:{nl:"Getest met echte fans",en:"Tested with real fans",pt:"Testado com torcedores de verdade"},
+    spine:{nl:"Testen",en:"Testing",pt:"Testes"},
+    text:{nl:["Ik zag ontwerpen niet als eindproduct. Ik publiceerde op TikTok en Instagram, experimenteerde met korte video's en analyseerde views, shares, saves en reacties.","Binnen een maand ging het account van nul naar 30.000 likes. De views stuurden fans door naar de website, waar de artikelen beter gelezen werden."],
+          en:["I didn't treat designs as finished products. I published on TikTok and Instagram, experimented with short-form video and analysed views, shares, saves and comments.","Within a month, the account went from zero to 30,000 likes. The views sent fans through to the website, where the articles were read more."],
+          pt:["Não tratei os designs como produtos finais. Publiquei no TikTok e no Instagram, testei vídeos curtos e analisei visualizações, compartilhamentos, salvamentos e comentários.","Em um mês, a conta foi de zero a 30 mil curtidas. As visualizações levaram os torcedores ao site, onde os artigos passaram a ser mais lidos."]},
+    media:[["fp-test-1",null],["fp-test-2",null],["fp-test-3",null],["fp-test-4",null]]},
+   {id:"brandguide", layout:"guide",
+    title:{nl:"Een brandguide die blijft",en:"A brand guide that lasts",pt:"Um manual que permanece"},
+    spine:{nl:"Brandguide",en:"Brand guide",pt:"Manual da marca"},
+    text:{nl:["Met weinig productietijd en een snelle nieuwscyclus moest alles makkelijk te herhalen zijn. Daarom legde ik typografie, kleur, logoplaatsing, grafische elementen en tone of voice vast, zodat de stijl ook na mijn stage overeind blijft."],
+          en:["With limited production time and a fast news cycle, everything had to be easy to repeat. So I documented typography, colour, logo placement, graphic elements and tone of voice, keeping the style consistent beyond my internship."],
+          pt:["Com pouco tempo de produção e um ciclo de notícias rápido, tudo precisava ser fácil de repetir. Por isso documentei tipografia, cor, posição do logo, elementos gráficos e tom de voz, para que o estilo continue depois do meu estágio."]}}
+  ],
+  stats:{nl:[["970K","views op één TikTok-video"],["30K+","likes in de eerste maand, vanaf nul"],["1,3M","views op deze vier video's samen"],["12","formats vastgelegd in de brandguide"]],
+         en:[["970K","views on a single TikTok video"],["30K+","likes in the first month, from zero"],["1.3M","views across these four videos"],["12","formats documented in the brand guide"]],
+         pt:[["970 mil","visualizações em um vídeo do TikTok"],["30 mil+","curtidas no primeiro mês, partindo do zero"],["1,3 mi","visualizações nesses quatro vídeos"],["12","formatos documentados no manual"]]},
+  reflection:{nl:"Ik leerde verder te kijken dan losse ontwerpen en te denken in een compleet contentsysteem: creatieve ambitie afwegen tegen productiesnelheid, feedback van fans lezen en zelfstandig een ontwerpproces sturen binnen een kleine organisatie.",
+              en:"I learned to look beyond individual designs and think in a complete content system: balancing creative ambition with production speed, reading fan feedback and independently running a design process within a small organisation.",
+              pt:"Aprendi a olhar além de peças isoladas e a pensar em um sistema de conteúdo completo: equilibrar ambição criativa e velocidade de produção, interpretar o feedback dos torcedores e conduzir sozinho um processo de design em uma organização pequena."}
+ },
+ cc:{ title:"Comida Carioca", hero:"cc-hero", ring:["#F2A31B","#2E9B4B","#B0457F","#C8552D"], visuals:[], guide:21, key:"cc",
+  intro:{nl:"Een festivalidentiteit die Braziliaanse cultuur en studenten samenbrengt.",
+         en:"A festival identity that brings Brazilian culture and students together.",
+         pt:"Uma identidade de festival que aproxima a cultura brasileira e os estudantes."},
+  meta:{nl:[["Rol","Branding & visual design"],["Context","CMD-project"],["Locatie","Rio de Janeiro"]],
+        en:[["Role","Branding & visual design"],["Context","CMD project"],["Location","Rio de Janeiro"]],
+        pt:[["Função","Branding & design visual"],["Contexto","Projeto CMD"],["Local","Rio de Janeiro"]]},
+  blocks:{nl:["Het jaarlijkse welkomstmoment voor internationale studenten aan PUC-Rio draaide vooral om ontmoeting, terwijl de lokale cultuur nauwelijks zichtbaar was. Ik ontwikkelde daarom het concept voor Comida Carioca: een fictief foodfestival waar Braziliaanse gerechten lokale en internationale studenten samenbrengen.",
+              "Vanuit doelgroeponderzoek en gesprekken met betrokkenen stelde ik vier merkwaarden op. Deze vormden de basis voor verschillende logo's, kleurenpaletten, typografische richtingen en posters. Vier posterontwerpen testte ik vervolgens met acht internationale studenten om te ontdekken welke richting het beste aansloot bij de gewenste identiteit.",
+              "Een complete visuele festivalidentiteit met een brandguide en toepassingen voor print en digitale communicatie. De uiteindelijke ontwerprichting combineert de leesbare typografie van de ene testposter met de sfeer van de andere, waarbij de compositie rustiger is gemaakt op basis van feedback."],
+          en:["PUC-Rio's yearly welcome for international students was mostly about meeting each other, while the local culture was barely visible. So I developed the concept for Comida Carioca: a fictional food festival where Brazilian dishes bring local and international students together.",
+              "Based on audience research and conversations with people involved, I set four brand values. These formed the basis for several logos, colour palettes, typographic directions and posters. I then tested four poster designs with eight international students to find out which direction best matched the intended identity.",
+              "A complete visual festival identity with a brand guide and applications for print and digital communication. The final design direction combines the readable typography of one test poster with the atmosphere of another, with a calmer composition based on feedback."],
+          pt:["O momento anual de boas-vindas aos estudantes internacionais da PUC-Rio girava principalmente em torno do encontro, enquanto a cultura local quase não aparecia. Por isso desenvolvi o conceito do Comida Carioca: um festival de comida fictício em que pratos brasileiros aproximam estudantes locais e internacionais.",
+              "A partir da pesquisa com o público e de conversas com pessoas envolvidas, defini quatro valores de marca. Eles serviram de base para diferentes logos, paletas de cores, direções tipográficas e cartazes. Depois, testei quatro cartazes com oito estudantes internacionais para descobrir qual direção combinava melhor com a identidade desejada.",
+              "Uma identidade visual completa para o festival, com manual da marca e aplicações para comunicação impressa e digital. A direção final combina a tipografia legível de um cartaz testado com o clima de outro, com uma composição mais tranquila graças ao feedback."]},
+  chapters:[
+   {id:"cc-onderzoek",
+    title:{nl:"Van picknick naar foodfestival",en:"From picnic to food festival",pt:"Do piquenique ao festival de comida"},
+    spine:{nl:"Onderzoek",en:"Research",pt:"Pesquisa"},
+    text:{nl:["Tijdens mijn verblijf in Rio onderzocht ik het jaarlijkse welkomstmoment van PUC-Rio. Een betrokken organisator vertelde me dat het vooral draaide om samenkomen, maar weinig van de lokale cultuur liet zien.","Zo ontstond het idee voor Comida Carioca: een fictief streetfoodfestival waar Braziliaanse gerechten de basis vormen voor een eerste ontmoeting tussen lokale en internationale studenten."],
+          en:["While living in Rio, I looked into PUC-Rio's yearly welcome event. One of the organisers told me it was mostly about getting together, but showed little of the local culture.","That led to the idea for Comida Carioca: a fictional street food festival where Brazilian dishes are the starting point for a first meeting between local and international students."],
+          pt:["Durante minha estadia no Rio, estudei o evento anual de boas-vindas da PUC-Rio. Uma das organizadoras me contou que o foco era reunir as pessoas, mas que mostrava pouco da cultura local.","Daí nasceu a ideia do Comida Carioca: um festival fictício de comida de rua em que pratos brasileiros são o ponto de partida para um primeiro encontro entre estudantes locais e internacionais."]},
+    parts:[{t:"cm",layout:"g2",media:[["cc-guide-4",{nl:"Missie, visie en uitdaging",en:"Mission, vision and challenge",pt:"Missão, visão e desafio"}],["cc-guide-2",{nl:"De kernboodschap",en:"The core message",pt:"A mensagem central"}]]}]},
+   {id:"cc-identiteit",
+    title:{nl:"Vier merkwaarden",en:"Four brand values",pt:"Quatro valores"},
+    spine:{nl:"Merkidentiteit",en:"Brand identity",pt:"Identidade"},
+    text:{nl:["Ik wilde voorkomen dat Comida Carioca een standaard Braziliaans festival vol clichés zou worden. Daarom stelde ik vier merkwaarden op die richting gaven aan mijn ontwerpen.","Vanuit deze waarden onderzocht ik kleurenpaletten, typografische stijlen en visuele elementen, en besprak ik ze met studenten."],
+          en:["I wanted to avoid Comida Carioca becoming a standard Brazilian festival full of clichés. So I set four brand values to guide my designs.","From these values, I explored colour palettes, typographic styles and visual elements, and discussed them with students."],
+          pt:["Eu não queria que o Comida Carioca virasse mais um festival brasileiro cheio de clichês. Por isso defini quatro valores que guiaram meus designs.","A partir desses valores, explorei paletas de cores, estilos tipográficos e elementos visuais, e conversei sobre eles com estudantes."]},
+    parts:[{t:"cards",items:{
+      nl:[["Taalvriendelijk","Een identiteit die ook zonder uitgebreide uitleg te begrijpen is."],["Zintuiglijk","Kleuren en illustraties die nieuwsgierig maken naar de smaken en sfeer."],["Momentgedreven","Een uitstraling die uitnodigt om samen iets bijzonders te beleven."],["Brasilidade","Een herkenbaar Braziliaanse sfeer, zonder terug te vallen op stereotypen."]],
+      en:[["Language-friendly","An identity that's easy to understand, even without much explanation."],["Sensory","Colours and illustrations that make you curious about the flavours and atmosphere."],["Moment-driven","A look that invites people to experience something special together."],["Brasilidade","A recognisably Brazilian feel, without falling back on stereotypes."]],
+      pt:[["Acessível","Uma identidade fácil de entender, mesmo sem muita explicação."],["Sensorial","Cores e ilustrações que despertam curiosidade pelos sabores e pelo clima."],["Feito de momentos","Um visual que convida a viver algo especial juntos."],["Brasilidade","Um clima reconhecidamente brasileiro, sem cair em estereótipos."]]}},
+     {t:"cm",layout:"g2",media:[["cc-guide-5",{nl:"Merkwaarden",en:"Brand values",pt:"Valores da marca"}],["cc-guide-9",{nl:"Kleurenpalet",en:"Colour palette",pt:"Paleta de cores"}],["cc-guide-14",{nl:"Typografie",en:"Typography",pt:"Tipografia"}],["cc-guide-6",{nl:"Logovarianten",en:"Logo variations",pt:"Variações do logo"}]]}]},
+   {id:"cc-testen",
+    title:{nl:"Van acht posters naar één richting",en:"From eight posters to one direction",pt:"De oito cartazes a uma direção"},
+    spine:{nl:"Ontwerpen & testen",en:"Design & testing",pt:"Design & testes"},
+    text:{nl:["Ik experimenteerde met kleuren, lettertypes en illustraties van Braziliaanse gerechten, op zoek naar een balans tussen speels en tropisch, en duidelijk en toegankelijk. Zo ontstonden acht posters met dezelfde basisidentiteit, die verschilden in typografie, compositie en grafische elementen.","De vier sterkste testte ik met acht internationale studenten van PUC-Rio, onder andere uit Spanje, Portugal, Argentinië en Mexico, in een vergelijkende gebruikerstest."],
+          en:["I experimented with colours, typefaces and illustrations of Brazilian dishes, looking for a balance between playful and tropical, and clear and accessible. This resulted in eight posters sharing the same core identity, differing in typography, composition and graphic elements.","I tested the four strongest with eight international students at PUC-Rio, from countries including Spain, Portugal, Argentina and Mexico, in a comparative user test."],
+          pt:["Experimentei cores, fontes e ilustrações de pratos brasileiros, buscando um equilíbrio entre o lúdico e tropical e o claro e acessível. Assim surgiram oito cartazes com a mesma identidade base, variando em tipografia, composição e elementos gráficos.","Testei os quatro mais fortes com oito estudantes internacionais da PUC-Rio, vindos de países como Espanha, Portugal, Argentina e México, em um teste comparativo com usuários."]},
+    parts:[{t:"stats"},
+           {t:"p",text:{nl:"Twee richtingen sprongen eruit. De ene werd gewaardeerd om de leesbare typografie en rustige compositie. De andere had volgens de deelnemers de meeste sfeer en potentie, maar was door de illustraties langs de randen nog te druk.",
+                        en:"Two directions stood out. One was valued for its readable typography and calm composition. Participants saw the most atmosphere and potential in the other, but found it too busy because of the illustrations along the edges.",
+                        pt:"Duas direções se destacaram. Uma foi elogiada pela tipografia legível e pela composição tranquila. Na outra, os participantes viram mais clima e potencial, mas a acharam carregada por causa das ilustrações nas bordas."}},
+           {t:"p",text:{nl:"Daarom combineerde ik de sterke punten van beide: de leesbare typografie van de eerste, met de sfeer van de tweede en minder nadruk op de illustraties. Zo kreeg de identiteit meer ruimte, zonder de Braziliaanse sfeer te verliezen.",
+                        en:"So I combined the strengths of both: the readable typography of the first, with the atmosphere of the second and less emphasis on the illustrations. This gave the identity more room, without losing the Brazilian atmosphere.",
+                        pt:"Então combinei os pontos fortes das duas: a tipografia legível da primeira, com o clima da segunda e menos destaque para as ilustrações. Assim a identidade ganhou mais espaço, sem perder o clima brasileiro."}}]},
+   {id:"cc-brandguide",
+    title:{nl:"Alles samen in één brandguide",en:"Everything in one brand guide",pt:"Tudo em um manual da marca"},
+    spine:{nl:"Brandguide",en:"Brand guide",pt:"Manual da marca"},
+    text:{nl:["Na het testen bracht ik alles samen in een brandguide, met logo, kleurgebruik, typografie, tone of voice en grafische elementen."],
+          en:["After testing, I brought everything together in a brand guide, covering the logo, colour use, typography, tone of voice and graphic elements."],
+          pt:["Depois dos testes, reuni tudo em um manual da marca, com logo, uso de cores, tipografia, tom de voz e elementos gráficos."]},
+    parts:[{t:"guide"},
+           {t:"p",text:{nl:"Medestudenten en een ontwerpexpert gaven feedback op leesbaarheid, logotoepassingen en de uitleg van grafische elementen. Die inzichten vormen de basis voor een volgende versie.",
+                        en:"Fellow students and a design expert gave feedback on readability, logo applications and the explanation of graphic elements. Those insights form the basis for a next version.",
+                        pt:"Colegas e um especialista em design deram feedback sobre legibilidade, aplicações do logo e a explicação dos elementos gráficos. Esses insights são a base para uma próxima versão."}},
+           {t:"cm",layout:"g3sq",media:[["cc-rev1",{nl:"Instagram: festivalreview",en:"Instagram: festival review",pt:"Instagram: review do festival"}],["cc-card",{nl:"Eventkaart",en:"Event card",pt:"Cartão do evento"},{contain:1,bg:"#582644"}],["cc-rev2",{nl:"Instagram: festivalreview",en:"Instagram: festival review",pt:"Instagram: review do festival"}]]}]}
+  ],
+  stats:{nl:[["8","internationale testpersonen"],["4","posterontwerpen getest"],["1","gekozen ontwerprichting"]],
+         en:[["8","international participants"],["4","poster designs tested"],["1","chosen design direction"]],
+         pt:[["8","participantes internacionais"],["4","cartazes testados"],["1","direção escolhida"]]},
+  reflection:{nl:"Comida Carioca leerde me hoe belangrijk het is om ontwerpkeuzes te onderbouwen. Eerst keek ik vooral naar wat visueel aantrekkelijk was. Tijdens het testen zag ik hoeveel kleine verschillen in typografie en compositie uitmaken. Door feedback serieus te nemen en richtingen te blijven vergelijken, ontstond een identiteit die niet alleen mijn smaak weerspiegelt, maar ook aansluit bij de doelgroep.",
+              en:"Comida Carioca taught me how important it is to back up design choices. At first I mostly looked at what was visually appealing. During testing, I saw how much small differences in typography and composition matter. By taking feedback seriously and continuing to compare directions, I created an identity that reflects not just my own taste, but also the audience.",
+              pt:"O Comida Carioca me ensinou a importância de fundamentar as escolhas de design. No começo eu olhava principalmente para o que era visualmente atraente. Nos testes, percebi o quanto pequenas diferenças de tipografia e composição fazem diferença. Levando o feedback a sério e comparando direções, criei uma identidade que reflete não só o meu gosto, mas também o público."}
+ }
+};
+const ORDER=["onze","fp","cc"];
+
+/* ======================================================
+   HELPERS
+   ====================================================== */
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t;
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let lang="nl"; try{ const s=localStorage.getItem("bemmel-taal"); if(s&&TXT[s]) lang=s; }catch(e){}
+const t=k=>TXT[lang][k]??TXT.nl[k]??"";
+const pick=o=>o[lang]??o.nl;
+
+function applyMedia(root=document){
+  $$("[data-media]",root).forEach(el=>{
+    const k=el.dataset.media, src=MEDIA[k];
+    const label=el.dataset.labelT?t(el.dataset.labelT):(el.dataset.label||"");
+    el.classList.toggle("ph",!src);
+    el.innerHTML=src?`<img src="${src}" alt="${label}" loading="lazy">`:`<div class="ph-in"><span class="k">${k}</span><span class="l">${label}</span></div>`;
+  });
+}
+
+function applyLang(first){
+  document.documentElement.lang=lang==="pt"?"pt-BR":lang;
+  $$("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+  $$("[data-t-html]").forEach(el=>el.innerHTML=t(el.dataset.tHtml));
+  $$(".h2").forEach(h=>h.innerHTML=`<span class="ln"><span>${h.innerHTML}</span></span>`);
+  $$(".h2.wavy").forEach(splitChars);
+  $$(".lang button").forEach(b=>b.classList.toggle("on",b.dataset.lang===lang));
+  buildMarquee(); buildWork(); buildBTS(); applyMedia($(".hero")); applyMedia($("#over"));
+  if(!first && $(".ov").classList.contains("open")) renderCase(current,true);
+  try{ localStorage.setItem("bemmel-taal",lang); }catch(e){}
+}
+$$(".lang button").forEach(b=>b.addEventListener("click",()=>{ lang=b.dataset.lang; applyLang(); }));
+
+/* ======================================================
+   DE GOLVENDE mm — heel licht, iets sneller bij hover
+   ====================================================== */
+const mmEls=$$(".mm path").filter(p=>!p.closest(".loader"));
+const mmPath=c=>`M11 92 V46 C11 ${c[0]}, 67 ${c[0]}, 67 46 C67 ${c[1]}, 124 ${c[1]}, 124 46 C124 ${c[2]}, 181 ${c[2]}, 181 46 C181 ${c[3]}, 238 ${c[3]}, 238 46 V92`;
+let phase=0, speed=0.0011, hovering=false, lastT=0;
+$$(".wlogo,.ov-bar .logo").forEach(l=>{ l.addEventListener("mouseenter",()=>hovering=true); l.addEventListener("mouseleave",()=>hovering=false); });
+function waveMM(now){
+  const dt=Math.min(50,now-(lastT||now)); lastT=now;
+  speed=lerp(speed,hovering?0.0026:0.0011,0.04);
+  phase+=dt*speed;
+  const amp=reduce?0:3.2;
+  const d=mmPath([0,1,2,3].map(i=>(2+amp*Math.sin(phase+i*1.1)).toFixed(2)));
+  mmEls.forEach(p=>p.setAttribute("d",d));
+}
+
+/* ======================================================
+   BUILDERS
+   ====================================================== */
+function buildMarquee(){
+  const w=`<svg viewBox="0 0 90 36" aria-hidden="true"><path d="M2 18 Q13 4 24 18 T46 18 T68 18 T90 18"></path></svg>`;
+  const item=`<span>${t("mq").join(` ${w} `)} ${w}</span>`;
+  $(".mq-track").innerHTML=Array(6).fill(item).join("");
+}
+const RATIOS=["900/1050","378/530","329/410","403/395","1000/1030","451/410","416/395","900/1017","900/650","382/423","451/418"];
+function buildWork(){
+  const g=$(".work-grid");
+  g.innerHTML=RATIOS.map((r,i)=>{ const k="werk-"+String(i+1).padStart(2,"0"); return `<button class="wk" data-reveal data-k="${k}"><div class="media" data-media="${k}" data-label="${t("mw.item")} ${i+1}" style="aspect-ratio:${r}"></div></button>`; }).join("");
+  applyMedia(g); observe($$(".wk",g));
+  $$(".wk",g).forEach(b=>b.addEventListener("click",()=>{ const list=RATIOS.map((_,i)=>MEDIA["werk-"+String(i+1).padStart(2,"0")]).filter(Boolean); const s=MEDIA[b.dataset.k]; if(s) openLB(list,list.indexOf(s)); }));
+  layoutWork(); let rt; addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(layoutWork,150); });
+}
+/* Verdeel de foto's over kolommen. CSS-kolommen lieten onderaan een groot gat (een foto kan niet
+   splitsen), dus: elke foto in de kortste kolom, daarna elke kolom een paar procent hoger/lager
+   uitsnijden (object-fit: cover) zodat alle kolommen precies even lang eindigen. */
+function layoutWork(){
+  const g=$(".work-grid"), items=$$(".wk",g).sort((a,b)=>a.dataset.k.localeCompare(b.dataset.k)); if(!items.length) return; // vaste volgorde, ook na herschikken
+  const W=g.clientWidth, n=W<900?2:3, gap=W<600?10:16, cw=(W-gap*(n-1))/n;
+  // probeer elke verdeling (11 foto's, 3 kolommen = 177.147 opties, een paar ms) en neem de gelijkste
+  const ph=items.map(b=>{ const [w,h]=RATIOS[+b.dataset.k.slice(5)-1].split("/").map(Number); return cw*h/w; });
+  let best=null, bestD=Infinity; const pick=new Array(items.length).fill(0), tot=new Array(n);
+  for(let k=0,N=n**items.length;k<N;k++){ let x=k; tot.fill(-gap);
+    for(let i=0;i<items.length;i++){ pick[i]=x%n; x=(x-pick[i])/n; tot[pick[i]]+=ph[i]+gap; }
+    const d=Math.max(...tot)-Math.min(...tot); if(d<bestD){ bestD=d; best=pick.slice(); } }
+  const cols=Array.from({length:n},()=>({items:[],h:-gap}));
+  items.forEach((b,i)=>{ const c=cols[best[i]]; c.items.push([b,ph[i]]); c.h+=ph[i]+gap; });
+  cols.sort((a,b)=>a.items[0][0].dataset.k.localeCompare(b.items[0][0].dataset.k)); // foto 01 linksboven
+  const target=cols.reduce((s,c)=>s+c.h,0)/n;
+  g.replaceChildren(); cols.forEach(c=>{ const el=document.createElement("div"); el.className="wk-col";
+    const imgH=c.h-gap*(c.items.length-1), f=(target-gap*(c.items.length-1))/imgH;
+    c.items.forEach(([b,ph])=>{ b.querySelector(".media").style.aspectRatio=`${cw} / ${ph*f}`; el.appendChild(b); });
+    g.appendChild(el); });
+}
+function buildBTS(){}
+
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} }),{threshold:.12,rootMargin:"0px 0px -5% 0px"});
+function observe(l){ l.forEach(el=>io.observe(el)); }
+
+/* ======================================================
+   CANVASSEN — golfpatroon (hero) en steen → golf (over mij)
+   ====================================================== */
+function fit(cv){ const r=cv.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2); const w=Math.round(r.width*dpr), h=Math.round(r.height*dpr); if(w&&h&&(cv.width!==w||cv.height!==h)){ cv.width=w; cv.height=h; } return dpr; }
+const shape=a=>{ const s=Math.sin(a); return Math.sign(s)*Math.pow(Math.abs(s),.55); };
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,k)=>{ const A=rgb(a),B=rgb(b); return `rgb(${A.map((v,i)=>Math.round(lerp(v,B[i],k))).join(",")})`; };
+
+/* achtergrond: calçadão van Ipanema, heel subtiel, met lichte parallax */
+const bgP=$(".bg-pattern");
+/* Make waves. en Cases: letters golven licht */
+function splitChars(el){
+  const walk=n=>[...n.childNodes].forEach(c=>{
+    if(c.nodeType===3){ const f=document.createDocumentFragment(); [...c.textContent].forEach(ch=>{ if(/\s/.test(ch)){ f.append(ch); return; } const sp=document.createElement("span"); sp.className="ch"; sp.textContent=ch; f.append(sp); }); c.replaceWith(f); }
+    else if(c.nodeType===1 && !c.classList.contains("uw") && !c.classList.contains("ch")) walk(c);
+  });
+  walk(el);
+}
+const slogan=$("#slogan"); splitChars(slogan);
+let sloganHover=false, sAmp=0;
+slogan.addEventListener("mouseenter",()=>sloganHover=true); slogan.addEventListener("mouseleave",()=>sloganHover=false);
+function waveChars(now){
+  sAmp=lerp(sAmp,sloganHover&&!reduce?1:0,.06);
+  $$(".ch",slogan).forEach((c,i)=>c.style.transform=sAmp>.01?`translateY(${(Math.sin(now*0.004-i*.55)*0.06*sAmp).toFixed(3)}em)`:"");
+  if(!reduce) $$(".wavy .ch").forEach((c,i)=>c.style.transform=`translateY(${(Math.sin(now*0.0022-i*.6)*0.035).toFixed(3)}em)`);
+}
+
+/* ======================================================
+   SCROLL + LOOP
+   ====================================================== */
+let lenis=null;
+if(window.Lenis&&!reduce){ lenis=new Lenis({lerp:.1,smoothWheel:true}); document.documentElement.style.scrollBehavior="auto"; }
+function go(target){ if(lenis) lenis.scrollTo(target,{duration:1.4,offset:target==="#cases"?-20:0}); else (target===0?scrollTo({top:0,behavior:"smooth"}):$(target)?.scrollIntoView({behavior:"smooth"})); }
+$$("[data-scroll]").forEach(a=>a.addEventListener("click",e=>{ e.preventDefault(); document.body.classList.remove("menu-open"); lenis?.start(); const h=a.getAttribute("href"); go(h==="#top"?0:h); }));
+
+let lastY=scrollY, mqx=0; const nav=$(".nav"), mq=$(".mq-track");
+function frame(now){
+  if(lenis) lenis.raf(now);
+  const y=scrollY, d=y-lastY; lastY=y; const vh=innerHeight;
+  nav.classList.toggle("scrolled",y>30);
+  if(!document.body.classList.contains("menu-open")){ if(d>5&&y>600) nav.classList.add("hide"); else if(d<-5||y<600) nav.classList.remove("hide"); }
+  waveMM(now);
+  waveChars(now);
+  bgP.style.opacity = y<vh*.6 ? ".28" : ".16";
+  if(!reduce) bgP.style.transform=`translate3d(0,${(-(y*0.06)%180).toFixed(1)}px,0)`;
+  if(!reduce){ const w=mq.scrollWidth/2; if(w){ mqx-=0.35; if(mqx<=-w) mqx+=w; mq.style.transform=`translate3d(${mqx}px,0,0)`; } }
+  requestAnimationFrame(frame);
+}
+
+/* klokken */
+function clocks(){ const f=z=>{ try{ return new Intl.DateTimeFormat("nl-NL",{hour:"2-digit",minute:"2-digit",timeZone:z}).format(new Date()); }catch(e){ return "--:--"; } };
+  $$(".t-utc").forEach(e=>e.textContent=f("Europe/Amsterdam")); $$(".t-rio").forEach(e=>e.textContent=f("America/Sao_Paulo")); }
+clocks(); setInterval(clocks,15000);
+
+/* menu */
+$(".burger").addEventListener("click",()=>{ const o=document.body.classList.toggle("menu-open"); o?lenis?.stop():lenis?.start(); });
+
+/* achter de schermen — rustige, sleepbare strip */
+(function(){
+  const POS=["50% 50%","50% 50%","50% 55%","50% 50%","50% 60%","55% 50%","50% 50%","50% 72%","50% 50%","50% 40%","50% 60%"];
+  const tr=$(".bts-track"); const keys=Object.keys(MEDIA).filter(k=>k.startsWith("bts-")&&MEDIA[k]);
+  const fig=(k,i)=>`<figure><div class="media"><img src="${MEDIA[k]}" alt="" style="object-position:${POS[i]||"50% 50%"}"></div></figure>`;
+  tr.innerHTML=[...keys.map(fig),...keys.map(fig)].join("");
+  let x=0,tx=0,down=false,sx=0,s0=0,moved=0;
+  const loop=()=>{ const half=tr.scrollWidth/2; if(!down&&!reduce) tx-=0.7; if(half){ if(tx<-half){tx+=half;x+=half;} if(tx>0){tx-=half;x-=half;} } x=lerp(x,tx,.12); tr.style.transform=`translate3d(${x}px,0,0)`; requestAnimationFrame(loop); };
+  const start=e=>{ down=true; moved=0; sx=(e.touches?e.touches[0].clientX:e.clientX); s0=tx; tr.classList.add("drag"); };
+  const move=e=>{ if(!down) return; const d=(e.touches?e.touches[0].clientX:e.clientX)-sx; moved=Math.max(moved,Math.abs(d)); tx=s0+d; };
+  const end=()=>{ down=false; tr.classList.remove("drag"); };
+  tr.addEventListener("mousedown",start); addEventListener("mousemove",move); addEventListener("mouseup",end);
+  tr.addEventListener("touchstart",start,{passive:true}); tr.addEventListener("touchmove",move,{passive:true}); tr.addEventListener("touchend",end);
+  tr.addEventListener("click",e=>{ const f=e.target.closest("figure"); if(!f||moved>6) return; const i=[...tr.children].indexOf(f)%keys.length; openLB(keys.map(k=>MEDIA[k]),i); });
+  /* touchpad: horizontaal vegen schuift direct; muiswiel: pagina scrolt gewoon door en de strip versnelt mee */
+  const wrapEl=$(".bts");
+  wrapEl.addEventListener("wheel",e=>{
+    if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){ e.preventDefault(); e.stopPropagation(); tx-=e.deltaX*1.4; }
+    else { tx-=e.deltaY*1.2; }
+  },{passive:false});
+  requestAnimationFrame(loop);
+})();
+
+/* lightbox */
+let lbL=[],lbI=0; const lb=$(".lb");
+function openLB(list,i){ if(!list.length) return; lbL=list; lbI=Math.max(0,i); $("img",lb).src=lbL[lbI]; lb.classList.add("open"); lenis?.stop(); }
+function stepLB(n){ lbI=(lbI+n+lbL.length)%lbL.length; $("img",lb).src=lbL[lbI]; }
+function closeLB(){ lb.classList.remove("open"); if(!$(".ov").classList.contains("open")) lenis?.start(); }
+$(".x",lb).onclick=closeLB; $(".p",lb).onclick=()=>stepLB(-1); $(".n",lb).onclick=()=>stepLB(1);
+lb.addEventListener("click",e=>{ if(e.target===lb) closeLB(); });
+
+/* ======================================================
+   CASE + BRANDGUIDE-VIEWER
+   ====================================================== */
+const ov=$(".ov"), ovIn=$(".ov-inner"); let current=null, gIdx=0;
+const WIP_LABEL={nl:"Work in progress",en:"Work in progress",pt:"Em construção"};
+const WAVE_SVG=`<svg viewBox="0 0 26 10" fill="none" aria-hidden="true"><path d="M1 5 Q5.5 0 10 5 T19 5 T25 5" stroke="var(--wave)" stroke-width="2" stroke-linecap="round"/></svg>`;
+function chaptersHTML(c,guideHTML){
+  const nr=i=>String(i+1).padStart(2,"0");
+  const ring=c.ring||["var(--wave)"];
+  const spine=`<nav class="spine" aria-label="${c.title}">${c.chapters.map((ch,i)=>`<button data-go="ch-${ch.id}" style="--c:${ring[i%ring.length]}"><b>${nr(i)}</b>${pick(ch.spine)}${WAVE_SVG}</button>`).join("")}</nav>`;
+  const fig=(m,j,pk)=>{ const o=m[2]||{}; const cap=m[1]?pick(m[1]):"";
+    return `<figure class="${pk===j?"pick":""}"><div class="media${o.contain?" contain":""}" data-media="${m[0]}" data-label="${cap}"${o.bg?` style="background:${o.bg}"`:""}></div>${cap?`<figcaption>${cap}${pk===j?` <span class="tag">${t("ui.chosen")}</span>`:""}</figcaption>`:""}</figure>`; };
+  const statsHTML=()=>c.stats?`<div class="stats" style="--n:${pick(c.stats).length}">${pick(c.stats).map(x=>`<div><strong>${x[0]}</strong><span>${x[1]}</span></div>`).join("")}</div>`:"";
+  const part=(pt)=>{
+    if(pt.t==="guide") return guideHTML;
+    if(pt.t==="stats") return statsHTML();
+    if(pt.t==="sub") return `<h4 class="chap-sub">${pick(pt.text)}</h4>`;
+    if(pt.t==="p") return `<p class="chap-p">${pick(pt.text)}</p>`;
+    if(pt.t==="cards") return `<div class="vcards">${pick(pt.items).map((x,i)=>`<div><b>${nr(i)}</b><h5>${x[0]}</h5><p>${x[1]}</p></div>`).join("")}</div>`;
+    if(pt.t==="cm") return `<div class="cm ${pt.layout}">${pt.media.map((m,j)=>fig(m,j,pt.pick)).join("")}</div>`;
+    return "";
+  };
+  const body=c.chapters.map((ch,i)=>{
+    let media="";
+    if(ch.parts) media=ch.parts.map(part).join("");
+    else {
+      if(ch.layout==="guide") media=guideHTML;
+      else if(ch.layout==="dirs") media=ch.groups.map((g,gi)=>`<div class="dir${ch.pick===gi?" pick":""}"><div class="dir-h"><b>${String.fromCharCode(65+gi)}</b>${pick(g.label)}${ch.pick===gi?` <span class="tag">${t("ui.chosen")}</span>`:""}</div><div class="cm d5">${[1,2,3,4,5].map(j=>`<figure><div class="media" data-media="${g.key}-${j}" data-label=""></div></figure>`).join("")}</div></div>`).join("");
+      else media=`<div class="cm ${ch.layout}">${ch.media.map((m,j)=>fig(m,j,ch.pick)).join("")}</div>`;
+      if(ch.stats) media=statsHTML()+media;
+    }
+    return `<section class="chap" id="ch-${ch.id}" data-reveal>
+      <div class="chap-head"><h3><b>${nr(i)}</b>${pick(ch.title)}${ch.wip?`<span class="wip chap-wip">${pick(WIP_LABEL)}</span>`:""}</h3><div>${pick(ch.text).map(p=>`<p>${p}</p>`).join("")}</div></div>
+      ${media}</section>`;
+  }).join("");
+  const refl=c.reflection?`<section class="chap" data-reveal><div class="chap-head"><h3>${t("ui.reflection")}</h3><div><p>${pick(c.reflection)}</p></div></div></section>`:"";
+  return spine+body+refl;
+}
+/* ======================================================
+   PROJETO ONZE — de website in een laptop
+   De hele site (3D-rek + shop) zit ingepakt in window.PO_SITE (gemaakt met "npm run portfolio"
+   in de map Projeto Onze). Pas bij een klik pakken we hem uit: zo blijft de case snel.
+   ====================================================== */
+const SITE_TXT={
+  nl:{h:"De website",wip:"Work in progress",p:"De homepage is een 3D-kledingrek: echte T-shirts aan hangers die je kunt bekijken, omdraaien en in je tas doen. Daarachter zit de shop met productpagina’s, tas en afrekenen. Klik gerust rond in de laptop.",note:"Nog niet af: de site is nog in ontwikkeling, dus teksten, prijzen en details kunnen nog veranderen.",start:"Open de website",busy:"Even laden…",rack:"Het rek",shop:"Shop",full:"Volledig scherm",exit:"Sluiten ✕"},
+  en:{h:"The website",wip:"Work in progress",p:"The homepage is a 3D clothing rack: real T-shirts on hangers that you can look at, turn around and add to your bag. Behind it is the shop with product pages, bag and checkout. Feel free to click around in the laptop.",note:"Not finished yet: the site is still in development, so texts, prices and details may still change.",start:"Open the website",busy:"Loading…",rack:"The rack",shop:"Shop",full:"Full screen",exit:"Close ✕"},
+  pt:{h:"O site",wip:"Em construção",p:"A homepage é uma arara em 3D: camisetas de verdade em cabides, que você pode olhar, virar e colocar na sacola. Por trás dela está a loja, com páginas de produto, sacola e checkout. Fique à vontade para navegar no laptop.",note:"Ainda não está pronto: o site está em desenvolvimento, então textos, preços e detalhes ainda podem mudar.",start:"Abrir o site",busy:"Carregando…",rack:"A arara",shop:"Loja",full:"Tela cheia",exit:"Fechar ✕"}
+};
+const st=k=>(SITE_TXT[lang]||SITE_TXT.nl)[k];
+function siteHTML(){
+  const badge=window.PO_SITE?.images?.["/brand/projeto-onze-badge.webp"];
+  return `<section class="site" data-reveal>
+    <div class="site-head"><h3>${st("h")}</h3><span class="wip">${st("wip")}</span></div>
+    <p class="site-p">${st("p")}<small>${st("note")}</small></p>
+    <div class="laptop"><div class="lt-lid"><span class="lt-cam"></span><div class="lt-screen">
+      <div class="lt-bar"><i></i><i></i><i></i><span class="lt-url"><b>Projeto Onze</b> · <span class="lt-page">${st("rack")}</span></span><span class="wip">${st("wip")}</span></div>
+      <div class="lt-port">
+        <button class="lt-start">${badge?`<img src="data:image/webp;base64,${badge}" alt="Projeto Onze">`:""}<span>${st("start")}</span></button>
+      </div></div></div><div class="lt-base"></div></div>
+  </section>`;
+}
+
+/* uitpakken: base64 → gzip → tekst; plaatjes worden data-URL's, de rest blob-URL's */
+let sitePack=null;
+async function unpackSite(){
+  if(sitePack) return sitePack;
+  const P=window.PO_SITE; if(!P) throw new Error("PO_SITE ontbreekt");
+  const unz=async b=>new Response(new Blob([Uint8Array.from(atob(b),c=>c.charCodeAt(0))]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+  const txt={}; for(const [k,v] of Object.entries(P.text)) txt[k]=await unz(v);
+  /* "/shirts/x/front.webp?v=123" → het plaatje zelf, zodat niets meer naar een server hoeft */
+  const img=s=>s.replace(/\/(?:shirts|products|brand)\/[\w./-]+?\.webp(?:\?v=\d+)?/g,m=>{ const k=m.split("?")[0]; return P.images[k]?`data:image/webp;base64,${P.images[k]}`:m; });
+  /* Elke pagina krijgt een kleine "router": links naar /… gaan via het portfolio naar de juiste ingepakte pagina */
+  const router=`<script>(function(){var go=function(u){parent.postMessage({poNav:String(u)},"*")};window.__poGo=go;
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href")||"";
+if(/^https?:/i.test(h)){e.preventDefault();window.open(h,"_blank","noopener");return}if(h.charAt(0)==="/"){e.preventDefault();go(h)}},true);})();<\/script>`;
+  const blob=(s,type)=>URL.createObjectURL(new Blob([s],{type}));
+  const js=blob(img(txt["rack.js"]),"text/javascript"), css=blob(img(txt["rack.css"]),"text/css");
+  const fonts=`<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Fraunces:ital,opsz,wght@1,9..144,600;1,9..144,800&family=Familjen+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">`;
+  const pages={};
+  ["nl","pt","en"].forEach(l=>{ pages["index-"+l]=blob(`<!doctype html><html lang="${l}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070b08"><title>Projeto Onze</title>${router}<script>window.__PO_LANG="${l}"<\/script>${fonts}<link rel="stylesheet" href="${css}"></head><body><div id="root"></div><script src="${js}"><\/script><\/body><\/html>`,"text/html"); });
+  ["shop.html","shop-pt.html","shop-en.html"].forEach(f=>{
+    const h=img(txt[f]).replace(/<head>/i,"<head>"+router).replace(/location\.href\s*=\s*("[^"]*")/g,"__poGo($1)");
+    pages[f]=blob(h,"text/html");
+  });
+  return sitePack=pages;
+}
+
+let siteFrame=null, siteLang="nl", siteFit=null;
+function siteNav(u){
+  if(!sitePack||!siteFrame) return;
+  const [path,hash=""]=String(u).split("#"); let key, name;
+  const m=/^\/shop(-pt|-en)?\.html/.exec(path);
+  if(m){ key=`shop${m[1]||""}.html`; siteLang=m[1]?m[1].slice(1):"nl"; name=st("shop"); }
+  else { const l=/lang=(nl|pt|en)/.exec(path); if(l) siteLang=l[1]; key="index-"+siteLang; name=st("rack"); }
+  siteFrame.src=sitePack[key]+(hash?"#"+hash:"");
+  const pg=$(".lt-page",ovIn); if(pg) pg.textContent=name;
+}
+addEventListener("message",e=>{ if(siteFrame&&e.source===siteFrame.contentWindow&&e.data&&e.data.poNav) siteNav(e.data.poNav); });
+
+function initSite(){
+  const sec=$(".site",ovIn); if(!sec) return;
+  const port=$(".lt-port",sec), start=$(".lt-start",sec);
+  siteLang=lang;
+  /* de site draait op een gewone desktopmaat (1440×900) en wordt verkleind in het scherm; volledig scherm = echte maat */
+  siteFit=()=>{ if(!siteFrame) return; const big=document.fullscreenElement===port||port.classList.contains("fs");
+    siteFrame.style.width=big?"100%":"1440px"; siteFrame.style.height=big?"100%":"900px";
+    siteFrame.style.transform=big?"none":`scale(${port.clientWidth/1440})`; };
+  new ResizeObserver(()=>siteFit&&siteFit()).observe(port);
+  const boot=async(first)=>{
+    if(siteFrame) return true;
+    start.classList.add("busy"); $("span",start).textContent=st("busy");
+    try{ await unpackSite(); }catch(err){ $("span",start).textContent="⚠ "+err.message; return false; }
+    siteFrame=document.createElement("iframe"); siteFrame.title="Projeto Onze"; siteFrame.allow="fullscreen";
+    port.prepend(siteFrame); siteFit(); siteNav(first||"/?lang="+lang);
+    siteFrame.addEventListener("load",()=>start.classList.add("gone"),{once:true});
+    return true;
+  };
+  start.onclick=()=>{ getSelection()?.removeAllRanges(); boot(); };
+
+}
+document.addEventListener("fullscreenchange",()=>siteFit&&siteFit());
+/* bij sluiten van de case stopt de site (anders blijft het 3D-rek op de achtergrond draaien) */
+function stopSite(){ if(siteFrame){ siteFrame.remove(); siteFrame=null; } siteFit=null; }
+
+function renderCase(key,keep){
+  stopSite();
+  const c=CASES[key]; current=key; gIdx=keep?gIdx:0;
+  const nx=CASES[ORDER[(ORDER.indexOf(key)+1)%ORDER.length]];
+  const pages=[...Array(c.guide)].map((_,i)=>`${c.key}-guide-${i+1}`);
+  const b=pick(c.blocks);
+  const guideHTML=`<section class="guide" aria-label="${t("ui.guide")}">
+      <div class="guide-head"><h3>${t("ui.guide")}</h3>
+        <div class="guide-ctrl"><button class="gp" aria-label="←">←</button><span class="cnt"></span><button class="gn" aria-label="→">→</button></div></div>
+      <div class="guide-stage"><div class="guide-track">${pages.map((k,i)=>`<div class="page" data-i="${i}"><div class="media contain" data-media="${k}" data-label="${t("ui.page")} ${i+1}"></div></div>`).join("")}</div></div>
+      <div class="guide-thumbs">${pages.map((k,i)=>`<button data-i="${i}" aria-label="${t("ui.page")} ${i+1}"><div class="media" data-media="${k}"></div></button>`).join("")}</div>
+    </section>`;
+  // titel in losse letters voor de animatie; schermlezers lezen de aria-label (de hele titel)
+  let n=0; const titleHTML=tt=>tt.split(" ").map(w=>`<span class="tw" aria-hidden="true">${[...w].map(ch=>`<span class="tc" style="--i:${n++}">${ch}</span>`).join("")}</span>`).join(" ");
+  ovIn.innerHTML=`<div class="wrap">
+    <header class="o-head${c.logo?" has-logo":""}">
+      <div><h2 class="o-title" aria-label="${c.title}">${titleHTML(c.title)}</h2>
+      <p class="o-intro">${pick(c.intro)}</p></div>
+      ${c.logo?`<div class="o-logo"><div class="media contain" data-media="${c.logo}" data-label="${c.title}" style="background:#fff"></div></div>`:""}
+      <dl class="o-meta">${pick(c.meta).map(m=>`<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join("")}</dl>
+    </header>
+    ${c.hero?`<div class="o-hero"><div class="media" data-media="${c.hero}" data-label="${c.title}"></div></div>`:""}
+    <div class="o-blocks">
+      <div><h3>${t("ui.challenge")}</h3><p>${b[0]}</p></div>
+      <div><h3>${t("ui.approach")}</h3><p>${b[1]}</p></div>
+      <div><h3>${t("ui.result")}</h3><p>${b[2]}</p></div>
+    </div>
+    ${key==="onze"?siteHTML():""}
+    ${c.chapters?chaptersHTML(c,guideHTML):`<div class="o-visuals">${c.visuals.map((k,i)=>`<div class="media" data-media="${k}" data-label="${t("ui.image")} ${i+1}"></div>`).join("")}</div>${guideHTML}`}
+    <a href="#" class="o-next"><span>${t("ui.next")}</span><h4>${nx.title} →</h4></a>
+  </div>`;
+  applyMedia(ovIn);
+  if(!keep) ov.scrollTop=0;
+  $$(".spine button",ovIn).forEach(bt=>bt.onclick=()=>{ const el=$("#"+bt.dataset.go,ovIn); if(el) ov.scrollTo({top:el.getBoundingClientRect().top+ov.scrollTop-100,behavior:"smooth"}); });
+  observe($$("[data-reveal]",ovIn));
+  $$(".cm",ovIn).forEach(cm=>{ const imgs=$$("img",cm).map(i=>i.src); $$("figure",cm).forEach(f=>{ const im=$("img",f); if(!im) return; f.style.cursor="zoom-in"; f.onclick=()=>openLB(imgs,imgs.indexOf(im.src)); }); });
+  const track=$(".guide-track",ovIn), thumbs=$$(".guide-thumbs button",ovIn), cnt=$(".cnt",ovIn), gp=$(".gp",ovIn), gn=$(".gn",ovIn);
+  const show=i=>{ gIdx=clamp(i,0,pages.length-1); track.style.transform=`translateX(${-gIdx*100}%)`; cnt.textContent=`${gIdx+1} / ${pages.length}`; gp.disabled=gIdx===0; gn.disabled=gIdx===pages.length-1;
+    thumbs.forEach((b,j)=>b.classList.toggle("on",j===gIdx)); const tc=thumbs[gIdx].parentElement, tb=thumbs[gIdx]; if(tb.offsetLeft<tc.scrollLeft||tb.offsetLeft+tb.offsetWidth>tc.scrollLeft+tc.clientWidth) tc.scrollTo({left:tb.offsetLeft-tc.clientWidth/2+tb.offsetWidth/2,behavior:"smooth"}); };
+  ov._show=show; show(gIdx);
+  gp.onclick=()=>show(gIdx-1); gn.onclick=()=>show(gIdx+1);
+  thumbs.forEach(b=>b.onclick=()=>show(+b.dataset.i));
+  $$(".page",ovIn).forEach(p=>p.onclick=()=>{ const list=pages.map(k=>MEDIA[k]).filter(Boolean); const s=MEDIA[pages[+p.dataset.i]]; if(s) openLB(list,list.indexOf(s)); });
+  let sx=null; const st=$(".guide-stage",ovIn);
+  st.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
+  st.addEventListener("touchend",e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40) show(gIdx+(dx<0?1:-1)); sx=null; });
+  $(".o-next",ovIn).onclick=e=>{ e.preventDefault(); ov.classList.remove("open"); setTimeout(()=>{ renderCase(ORDER[(ORDER.indexOf(key)+1)%ORDER.length]); ov.classList.add("open"); },450); };
+  if(key==="onze") initSite();
+  ov.setAttribute("aria-label",c.title);
+}
+function openCase(k){ renderCase(k); ov.scrollTop=0; ov.classList.add("open"); requestAnimationFrame(()=>ov.scrollTop=0); lenis?.stop(); document.documentElement.style.overflow="hidden"; setTimeout(()=>$(".ov-close").focus({preventScroll:true}),500); }
+function closeCase(){ stopSite(); ov.classList.remove("open"); document.documentElement.style.overflow=""; lenis?.start(); }
+$$(".ccard").forEach(c=>c.addEventListener("click",()=>openCase(c.dataset.case)));
+$(".ov-close").addEventListener("click",closeCase);
+addEventListener("keydown",e=>{
+  if(lb.classList.contains("open")){ if(e.key==="Escape") closeLB(); if(e.key==="ArrowRight") stepLB(1); if(e.key==="ArrowLeft") stepLB(-1); return; }
+  if(ov.classList.contains("open")){ if(e.key==="Escape") closeCase(); if(e.key==="ArrowRight") ov._show(gIdx+1); if(e.key==="ArrowLeft") ov._show(gIdx-1); return; }
+  if(e.key==="Escape") document.body.classList.remove("menu-open");
+});
+
+/* contact */
+(function(){ const m=$("#mail"); m.textContent=CONFIG.email; m.href="mailto:"+CONFIG.email; $("#mailbtn").href="mailto:"+CONFIG.email;
+  [["#li",CONFIG.linkedin]].forEach(([id,u])=>{ const a=$(id); if(u){ a.href=u; a.target="_blank"; a.rel="noopener"; } }); })();
+
+/* ======================================================
+   START
+   ====================================================== */
+applyMedia(); applyLang(true);
+observe($$("[data-reveal]"));
+requestAnimationFrame(frame);
+setTimeout(()=>{ $(".loader").classList.add("done"); document.body.classList.remove("loading"); document.body.classList.add("go"); }, reduce?100:1500);
+</script>
+<!-- PO-SITE:START (de site staat in po-site.js; "npm run portfolio:build" plakt hem erin) -->
+<script src="po-site.js"></script>
+<!-- PO-SITE:END -->
+</body>
+</html>
